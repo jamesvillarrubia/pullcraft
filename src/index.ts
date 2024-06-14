@@ -1,13 +1,12 @@
-// import { promisify } from 'util';
-// import fetch from 'node-fetch';
 import { Octokit } from '@octokit/rest';
-// import shell from 'shelljs';
 import simpleGit from 'simple-git';
 import { prompt } from './prompt';
 import { cosmiconfigSync } from 'cosmiconfig';
 import OpenAI from 'openai';
 import { openUrl } from './openWrapper'; // Import the openUrl function
 import { ChildProcess } from 'child_process';
+import { execSync } from 'child_process';
+import { GitHubClient, OctokitClient, GhClient } from './githubClient';
 
 const defaultExclusions = [
     ":(exclude)**/package-lock.json",
@@ -21,17 +20,18 @@ const defaultExclusions = [
     ":(exclude)**/*.tiff",
     ":(exclude)**/*.svg",
     ":(exclude)**/*.pdf"
-]
+];
+
 
 export class PrBot {
     openaiApiKey: string;
     githubToken: string;
-    octokit: any;
+    gitHubClient: GitHubClient;
     exclusions: string[];
     openai: any;
     git: any;
 
-    constructor(openaiApiKey:string, githubToken:string) {
+    constructor(openaiApiKey: string, githubToken: string) {
         this.openaiApiKey = openaiApiKey;
         if (!this.openaiApiKey) {
             throw new Error("Error: OPENAI_API_KEY is not set");
@@ -42,16 +42,24 @@ export class PrBot {
             throw new Error("Error: GITHUB_TOKEN is not set");
         }
 
-        this.octokit = new Octokit({ auth: this.githubToken });
+        this.gitHubClient = this.isGhCliAvailable() ? new GhClient() : new OctokitClient(this.githubToken);
 
-        // Load exclusions from config file using cosmiconfig
         const explorer = cosmiconfigSync('prbot');
         const config = explorer.search();
         this.exclusions = config?.config?.exclusions || defaultExclusions;
         this.openai = new OpenAI({
-            apiKey:this.openaiApiKey
+            apiKey: this.openaiApiKey
         });
         this.git = simpleGit();
+    }
+
+    isGhCliAvailable() {
+        try {
+            execSync('gh auth status');
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     async openUrl(url: string): Promise<ChildProcess> {
@@ -69,17 +77,17 @@ export class PrBot {
 
     async createPr(baseBranch = 'develop', compareBranch?: string) {
         try {
-            compareBranch = compareBranch || (await this.git.revparse(['--abbrev-ref', 'HEAD'])).trim() as string
+            compareBranch = compareBranch || (await this.git.revparse(['--abbrev-ref', 'HEAD'])).trim() as string;
             console.log(`Comparing branches: ${baseBranch} and ${compareBranch}`);
 
-            const prBody = await this.differ(baseBranch, compareBranch);
-            if (!prBody) {
+            const body = await this.differ(baseBranch, compareBranch);
+            if (!body) {
                 console.error("Error: PR body could not be retrieved.");
                 return;
             }
-            const prTitle = prBody.split('\n')[0].replace(/^# /, '');
+            const title = body.split('\n')[0].replace(/^# /, '');
 
-            if (!prTitle) {
+            if (!title) {
                 console.error("Error: PR title could not be extracted from the PR body.");
                 return;
             }
@@ -92,48 +100,41 @@ export class PrBot {
 
             const { owner, repo } = repoInfo;
 
-            const existingPrs = await this.octokit.pulls.list({
+            const existingPrs = await this.gitHubClient.listPulls({
                 owner,
                 repo,
                 base: baseBranch,
-                head: compareBranch
-            });
+                head: compareBranch});
 
-            if (existingPrs.data.length > 0) {
-                const prNumber = existingPrs.data[0].number;
-                console.log(`Updating existing PR #${prNumber}...`);
-                await this.octokit.pulls.update({
-                    owner,
-                    repo,
-                    pull_number: prNumber,
-                    title: prTitle,
-                    body: prBody
-                });
+            if (existingPrs.length > 0) {
+                const pull_number = existingPrs[0].number;
+                console.log(`Updating existing PR #${pull_number}...`);
+                await this.gitHubClient.updatePull({owner, repo, pull_number, title, body});
+
             } else {
                 console.log("Creating a new PR...");
-                const response = await this.octokit.pulls.create({
+                const response = await this.gitHubClient.createPull({
                     owner,
                     repo,
+                    title,
+                    body,
                     base: baseBranch,
-                    head: compareBranch,
-                    title: prTitle,
-                    body: prBody
-                });
-                await this.openUrl(response.data.html_url);
+                    head: compareBranch});
+                await this.openUrl(response.url);
             }
-        } catch (error:any) {
+        } catch (error: any) {
             console.error(`Error creating PR: ${error.message}`);
         }
     }
 
     async getRepoInfo() {
-        try{
+        try {
             const repoUrl = await this.git.raw(['config', '--get', 'remote.origin.url']);
             const match = repoUrl.match(/github\.com[:/](.+?)\/(.+?)\.git/);
             if (match) {
                 return { owner: match[1], repo: match[2] };
             }
-        } catch (error:any) {
+        } catch (error: any) {
             console.error(`Failed to get repo info`);
         }
     }
@@ -142,7 +143,7 @@ export class PrBot {
         try {
             const outcome = await this.git.diff(['--diff-filter=A', baseBranch, compareBranch, '--', '.', ...this.exclusions]);
             return outcome;
-        } catch (error:any) {
+        } catch (error: any) {
             console.error(`Error getting new files: ${error.message}`);
         }
     }
@@ -151,7 +152,7 @@ export class PrBot {
         try {
             const outcome = await this.git.diff([baseBranch, compareBranch, '--', '.', ...this.exclusions]);
             return outcome;
-        } catch (error:any) {
+        } catch (error: any) {
             console.error(`Error getting diff: ${error.message}`);
         }
     }
@@ -160,11 +161,10 @@ export class PrBot {
         try {
             const outcome = await this.git.diff(['--name-only', baseBranch, compareBranch, '--', '.']);
             return outcome;
-        } catch (error:any) {
+        } catch (error: any) {
             console.error(`Error getting filenames: ${error.message}`);
         }
     }
-
 
     async differ(baseBranch = 'develop', compareBranch: string) {
         try {
@@ -183,24 +183,24 @@ export class PrBot {
             const finalPrompt = `${textPrompt}${diff}\n\n${newFiles}\n\nFilenames:\n${filenames}`;
             const response = await this.gptCall(finalPrompt);
             return response;
-        } catch (error:any) {
+        } catch (error: any) {
             console.error(`Error generating PR body: ${error.message}`);
         }
     }
 
-    async gptCall(prompt:string){
+    async gptCall(prompt: string) {
         try {
             const response = await this.openai.completions.create({
-                model: 'gpt-4-turbo',
+                model: 'gpt-3.5-turbo-instruct',
                 prompt: prompt,
                 max_tokens: 1500,
                 n: 1,
                 stop: null,
                 temperature: 0.2
-            });
-
-            return response.data.choices[0].text.trim();
-        } catch (error:any) {
+            }); 
+            console.log(response)
+            return response.choices[0].text.trim();
+        } catch (error: any) {
             console.error(`Error calling OpenAI API: ${error.message}`);
         }
     }

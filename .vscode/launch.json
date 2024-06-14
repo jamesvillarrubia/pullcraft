@@ -29,6 +29,19 @@
             "skipFiles": [
                 "<node_internals>/**"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run prbot in test-repo",
+            "runtimeExecutable": "prbot",
+            "runtimeArgs": [
+                "main",
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "cwd": "${workspaceFolder}/test-repo"
         }
         
     ]

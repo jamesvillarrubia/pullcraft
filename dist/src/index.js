@@ -13,15 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrBot = void 0;
-// import { promisify } from 'util';
-// import fetch from 'node-fetch';
-const rest_1 = require("@octokit/rest");
-// import shell from 'shelljs';
 const simple_git_1 = __importDefault(require("simple-git"));
 const prompt_1 = require("./prompt");
 const cosmiconfig_1 = require("cosmiconfig");
 const openai_1 = __importDefault(require("openai"));
 const openWrapper_1 = require("./openWrapper"); // Import the openUrl function
+const child_process_1 = require("child_process");
+const githubClient_1 = require("./githubClient");
 const defaultExclusions = [
     ":(exclude)**/package-lock.json",
     ":(exclude)**/pnpm-lock.yaml",
@@ -46,8 +44,7 @@ class PrBot {
         if (!this.githubToken) {
             throw new Error("Error: GITHUB_TOKEN is not set");
         }
-        this.octokit = new rest_1.Octokit({ auth: this.githubToken });
-        // Load exclusions from config file using cosmiconfig
+        this.gitHubClient = this.isGhCliAvailable() ? new githubClient_1.GhClient() : new githubClient_1.OctokitClient(this.githubToken);
         const explorer = (0, cosmiconfig_1.cosmiconfigSync)('prbot');
         const config = explorer.search();
         this.exclusions = ((_a = config === null || config === void 0 ? void 0 : config.config) === null || _a === void 0 ? void 0 : _a.exclusions) || defaultExclusions;
@@ -55,6 +52,15 @@ class PrBot {
             apiKey: this.openaiApiKey
         });
         this.git = (0, simple_git_1.default)();
+    }
+    isGhCliAvailable() {
+        try {
+            (0, child_process_1.execSync)('gh auth status');
+            return true;
+        }
+        catch (_a) {
+            return false;
+        }
     }
     openUrl(url) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -76,13 +82,13 @@ class PrBot {
             try {
                 compareBranch = compareBranch || (yield this.git.revparse(['--abbrev-ref', 'HEAD'])).trim();
                 console.log(`Comparing branches: ${baseBranch} and ${compareBranch}`);
-                const prBody = yield this.differ(baseBranch, compareBranch);
-                if (!prBody) {
+                const body = yield this.differ(baseBranch, compareBranch);
+                if (!body) {
                     console.error("Error: PR body could not be retrieved.");
                     return;
                 }
-                const prTitle = prBody.split('\n')[0].replace(/^# /, '');
-                if (!prTitle) {
+                const title = body.split('\n')[0].replace(/^# /, '');
+                if (!title) {
                     console.error("Error: PR title could not be extracted from the PR body.");
                     return;
                 }
@@ -92,34 +98,28 @@ class PrBot {
                     return;
                 }
                 const { owner, repo } = repoInfo;
-                const existingPrs = yield this.octokit.pulls.list({
+                const existingPrs = yield this.gitHubClient.listPulls({
                     owner,
                     repo,
                     base: baseBranch,
                     head: compareBranch
                 });
-                if (existingPrs.data.length > 0) {
-                    const prNumber = existingPrs.data[0].number;
-                    console.log(`Updating existing PR #${prNumber}...`);
-                    yield this.octokit.pulls.update({
-                        owner,
-                        repo,
-                        pull_number: prNumber,
-                        title: prTitle,
-                        body: prBody
-                    });
+                if (existingPrs.length > 0) {
+                    const pull_number = existingPrs[0].number;
+                    console.log(`Updating existing PR #${pull_number}...`);
+                    yield this.gitHubClient.updatePull({ owner, repo, pull_number, title, body });
                 }
                 else {
                     console.log("Creating a new PR...");
-                    const response = yield this.octokit.pulls.create({
+                    const response = yield this.gitHubClient.createPull({
                         owner,
                         repo,
+                        title,
+                        body,
                         base: baseBranch,
-                        head: compareBranch,
-                        title: prTitle,
-                        body: prBody
+                        head: compareBranch
                     });
-                    yield this.openUrl(response.data.html_url);
+                    yield this.openUrl(response.url);
                 }
             }
             catch (error) {
@@ -198,14 +198,15 @@ class PrBot {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield this.openai.completions.create({
-                    model: 'gpt-4-turbo',
+                    model: 'gpt-3.5-turbo-instruct',
                     prompt: prompt,
                     max_tokens: 1500,
                     n: 1,
                     stop: null,
                     temperature: 0.2
                 });
-                return response.data.choices[0].text.trim();
+                console.log(response);
+                return response.choices[0].text.trim();
             }
             catch (error) {
                 console.error(`Error calling OpenAI API: ${error.message}`);

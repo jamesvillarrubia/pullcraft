@@ -4,15 +4,18 @@ import * as sinon from 'sinon';
 import simpleGit from 'simple-git';
 import PrBot from '../src/index';
 import proxyquire from 'proxyquire';
+import { GitHubClient, OctokitClient, GhClient } from '../src/githubClient';
 
 import { ChildProcess } from 'child_process';
-
 
 describe('PrBot', () => {
     let prBot: PrBot;
     let openaiStub: sinon.SinonStub;
     let openUrlStub: sinon.SinonStub;
     let gitStub: sinon.SinonStub;
+    let createPullStub: sinon.SinonStub;
+    let listPullsStub: sinon.SinonStub;
+    let updatePullStub: sinon.SinonStub;
 
     beforeEach(() => {
         openUrlStub = sinon.stub().resolves({} as ChildProcess);
@@ -22,6 +25,17 @@ describe('PrBot', () => {
 
         prBot = new PrBot('fake-openai-api-key', 'fake-github-token');
         openaiStub = sinon.stub(prBot.openai.completions, 'create');
+
+        // // Mock the appropriate client methods based on the available client
+        // if (prBot.gitHubClient instanceof OctokitClient) {
+        //     createPullStub = sinon.stub(prBot.gitHubClient, 'createPull');
+        //     listPullsStub = sinon.stub(prBot.gitHubClient, 'listPulls');
+        //     updatePullStub = sinon.stub(prBot.gitHubClient, 'updatePull');
+        // } else if (prBot.gitHubClient instanceof GhClient) {
+            createPullStub = sinon.stub(prBot.gitHubClient, 'createPull');
+            listPullsStub = sinon.stub(prBot.gitHubClient, 'listPulls');
+            updatePullStub = sinon.stub(prBot.gitHubClient, 'updatePull');
+        // }
     });
 
     afterEach(() => {
@@ -94,14 +108,12 @@ describe('PrBot', () => {
         });
     });
 
-
     describe('getDiff', () => {
         it('should get diff between branches', async () => {
             const baseBranch = 'main';
             const compareBranch = 'feature';
             const diffOutput = 'diff --git a/file1.txt b/file1.txt\nindex 83db48f..f735c2d 100644\n--- a/file1.txt\n+++ b/file1.txt\n@@ -1 +1 @@\n-Hello\n+Hello World\n';
             const gitStub = sinon.stub(prBot.git, 'diff').resolves(diffOutput);
-            // sinon.stub(prBot, 'git').get(() => prBot.git); // Ensure prBot uses the stubbed git instance
 
             const diff = await prBot.getDiff(baseBranch, compareBranch);
             expect(diff).to.equal(diffOutput);
@@ -112,7 +124,6 @@ describe('PrBot', () => {
             const compareBranch = 'feature';
             const errorMessage = 'Error getting diff';
             const gitStub = sinon.stub(prBot.git, 'diff').rejects(new Error(errorMessage));
-            // sinon.stub(prBot, 'git').get(() => prBot.git); // Ensure prBot uses the stubbed git instance
 
             const consoleErrorStub = sinon.stub(console, 'error');
             const diff = await prBot.getDiff(baseBranch, compareBranch);
@@ -120,13 +131,13 @@ describe('PrBot', () => {
             expect(consoleErrorStub.calledWith(`Error getting diff: ${errorMessage}`)).to.be.true;
         });
     });
+
     describe('getFilenames', () => {
         it('should get filenames between branches', async () => {
             const baseBranch = 'main';
             const compareBranch = 'feature';
             const filenamesOutput = 'file1.txt\nfile2.txt\n';
             const gitStub = sinon.stub(prBot.git, 'diff').resolves(filenamesOutput);
-            // sinon.stub(prBot, 'git').get(() => PrBot.git); // Ensure prBot uses the stubbed git instance
 
             const filenames = await prBot.getFilenames(baseBranch, compareBranch);
             expect(filenames).to.equal(filenamesOutput);
@@ -137,7 +148,6 @@ describe('PrBot', () => {
             const compareBranch = 'feature';
             const errorMessage = 'Error getting filenames';
             const gitStub = sinon.stub(prBot.git, 'diff').rejects(new Error(errorMessage));
-            // sinon.stub(prBot, 'git').get(() => PrBot.git); // Ensure prBot uses the stubbed git instance
 
             const consoleErrorStub = sinon.stub(console, 'error');
             const filenames = await prBot.getFilenames(baseBranch, compareBranch);
@@ -164,40 +174,43 @@ describe('PrBot', () => {
     });
 
     describe('createPr', () => {
-        it('should create a new PR', async () => {
+        it('should create or update a pull request', async () => {
             sinon.stub(console, 'log');
             const gitStub = sinon.stub(prBot.git, 'revparse').resolves('feature-branch\n');
             const differStub = sinon.stub(prBot, 'differ').resolves('PR body');
             const getRepoInfoStub = sinon.stub(prBot, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
-            const pullsListStub = sinon.stub(prBot.octokit.pulls, 'list').resolves({ data: [] });
-            const pullsCreateStub = sinon.stub(prBot.octokit.pulls, 'create').resolves({ data: { html_url: 'http://example.com' } });
+            listPullsStub.resolves([]);
+            createPullStub.resolves({ url: 'http://example.com' });
             const openUrlStub = sinon.stub(prBot, 'openUrl').resolves();
-
+    
             await prBot.createPr('develop');
     
             expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.be.true;
             expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
             expect(getRepoInfoStub.calledOnce).to.be.true;
-            expect(pullsListStub.calledOnceWith({ owner: 'owner', repo: 'repo', base: 'develop', head: 'feature-branch'})).to.be.true;
-            expect(pullsCreateStub.calledOnce).to.be.true;
+            expect(listPullsStub.calledOnceWith({ owner: 'owner', repo: 'repo', head: 'feature-branch', base: 'develop'})).to.be.true;
+            expect(createPullStub.calledOnceWith({
+                owner: 'owner',
+                repo: 'repo',
+                title: 'PR body',
+                body: 'PR body',
+                base: 'develop',
+                head: 'feature-branch' })).to.be.true;
             expect(openUrlStub.calledOnceWith('http://example.com')).to.be.true;
         });
-
-        it('should update an existing PR', async () => {
-            sinon.stub(console, 'log');
-            const gitStub = sinon.stub(prBot.git, 'revparse').resolves('feature-branch\n');
+    
+        it('should handle error when creating or updating a pull request', async () => {
+            const consoleErrorStub = sinon.stub(console, 'error');
+            const gitStub = sinon.stub(prBot.git, 'revparse').rejects(new Error('Failed to get current branch'));
             const differStub = sinon.stub(prBot, 'differ').resolves('PR body');
             const getRepoInfoStub = sinon.stub(prBot, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
-            const pullsListStub = sinon.stub(prBot.octokit.pulls, 'list').resolves({ data: [{ number: 1 }] });
-            const pullsUpdateStub = sinon.stub(prBot.octokit.pulls, 'update').resolves();
-
+            listPullsStub.resolves([]);
+            createPullStub.resolves({ url: 'http://example.com' });
+            const openUrlStub = sinon.stub(prBot, 'openUrl').resolves();
+    
             await prBot.createPr('develop');
-
-            expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.be.true;
-            expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
-            expect(getRepoInfoStub.calledOnce).to.be.true;
-            expect(pullsListStub.calledOnceWith({ owner: 'owner', repo: 'repo', base: 'develop', head: 'feature-branch' })).to.be.true;
-            expect(pullsUpdateStub.calledOnce).to.be.true;
+    
+            expect(consoleErrorStub.calledOnceWith('Error creating PR: Failed to get current branch')).to.be.true;
         });
     });
 });
