@@ -22,9 +22,9 @@ const githubClient_1 = require("./githubClient");
 const child_process_2 = require("child_process");
 const configName = "pullcraft";
 const defaultExclusions = [
-    ":(exclude)**/package-lock.json",
-    ":(exclude)**/pnpm-lock.yaml",
-    ":(exclude)**/yarn.lock",
+    ":(exclude)***package-lock.json",
+    ":(exclude)***pnpm-lock.yaml",
+    ":(exclude)***yarn.lock",
     ":(exclude)**/*.jpg",
     ":(exclude)**/*.jpeg",
     ":(exclude)**/*.png",
