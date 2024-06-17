@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PrBot = void 0;
+exports.PullCraft = void 0;
 const simple_git_1 = __importDefault(require("simple-git"));
 const prompt_1 = require("./prompt");
 const cosmiconfig_1 = require("cosmiconfig");
@@ -20,34 +20,7 @@ const openai_1 = __importDefault(require("openai"));
 const child_process_1 = require("child_process");
 const githubClient_1 = require("./githubClient");
 const child_process_2 = require("child_process");
-// {
-//     "exclusions": [
-//         ":(exclude)**/package-lock.json",
-//         ":(exclude)**/pnpm-lock.yaml",
-//         ":(exclude)**/yarn.lock",
-//         ":(exclude)**/*.jpg",
-//         ":(exclude)**/*.jpeg",
-//         ":(exclude)**/*.png",
-//         ":(exclude)**/*.gif",
-//         ":(exclude)**/*.bmp",
-//         ":(exclude)**/*.tiff",
-//         ":(exclude)**/*.svg",
-//         ":(exclude)**/*.pdf"
-//     ],
-//     "openPr": true,
-//     "githubStrategy": "gh",
-//     "openAi":{
-//         "apiKey": "YOUR_OPENAI_API_KEY",
-//         "url": "https://api.openai.com/v1/chat/completions",
-//         "model": "gpt-3.5-turbo-instruct",
-//         "prompt": "YOUR_PROMPT_HERE",
-//         "max_tokens": 1500,
-//         "n": 1,
-//         "stop": null,
-//         "temperature": 0.2  
-//     }
-// }
-const configName = "prbot";
+const configName = "pullcraft";
 const defaultExclusions = [
     ":(exclude)**/package-lock.json",
     ":(exclude)**/pnpm-lock.yaml",
@@ -76,7 +49,7 @@ const openaiDefaults = {
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
-class PrBot {
+class PullCraft {
     constructor(commanderOptions) {
         var _a, _b;
         this.replacements = {};
@@ -211,7 +184,7 @@ class PrBot {
                         base: baseBranch,
                         head: compareBranch
                     });
-                    yield this.openUrl(response.url);
+                    yield this.openUrl(response.data.html_url);
                 }
             }
             catch (error) {
@@ -334,5 +307,5 @@ class PrBot {
         });
     }
 }
-exports.PrBot = PrBot;
-exports.default = PrBot;
+exports.PullCraft = PullCraft;
+exports.default = PullCraft;

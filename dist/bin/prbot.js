@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const index_1 = __importDefault(require("../src/index")); // Adjust the path to where your PrBot class is located
+const index_1 = __importDefault(require("../src/index")); // Adjust the path to where your PullCraft class is located
 const dotenv_1 = __importDefault(require("dotenv"));
 // Load environment variables from a .env file if it exists
 dotenv_1.default.config();
@@ -47,8 +47,8 @@ const nested = {
         bodyTemplate: options.bodyTemplate
     }
 };
-const prBot = new index_1.default(nested);
-prBot.createPr().catch((error) => {
+const pullCraft = new index_1.default(nested);
+pullCraft.createPr().catch((error) => {
     console.error(`Error creating PR: ${error.message}`);
     process.exit(1);
 });

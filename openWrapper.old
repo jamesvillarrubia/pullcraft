@@ -1,6 +1,0 @@
-import { ChildProcess } from 'child_process';
-import { open } from './open-lib'
-export async function openUrl(url: string): Promise<ChildProcess> {
-    const { default: open } = await import('open');
-    return open(url);
-}

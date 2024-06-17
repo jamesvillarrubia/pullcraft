@@ -8,7 +8,7 @@ import { GitHubClient, OctokitClient, GhClient } from './githubClient';
 import { exec } from 'child_process';
 
 
-const configName = "prbot";
+const configName = "pullcraft";
 const defaultExclusions = [
     ":(exclude)**/package-lock.json",
     ":(exclude)**/pnpm-lock.yaml",
@@ -38,7 +38,7 @@ const openaiDefaults = {
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
 
-export class PrBot {
+export class PullCraft {
     githubToken: string;
     gitHubClient: GitHubClient;
     exclusions: string[];
@@ -330,4 +330,4 @@ export class PrBot {
     }
 }
 
-export default PrBot;
+export default PullCraft;

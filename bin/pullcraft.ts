@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import PrBot from '../src/index'; // Adjust the path to where your PrBot class is located
+import PullCraft from '../src/index'; // Adjust the path to where your PullCraft class is located
 import dotenv from 'dotenv';
 
 // Load environment variables from a .env file if it exists
@@ -54,8 +54,8 @@ const nested = {
 }
 
 
-const prBot = new PrBot(nested);
-prBot.createPr().catch((error:any) => {
+const pullCraft = new PullCraft(nested);
+pullCraft.createPr().catch((error:any) => {
     console.error(`Error creating PR: ${error.message}`);
     process.exit(1);
 });

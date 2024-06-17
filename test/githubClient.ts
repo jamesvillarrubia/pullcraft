@@ -1,12 +1,8 @@
 import { expect } from 'chai';
-import * as nock from 'nock';
 import * as sinon from 'sinon';
-import simpleGit from 'simple-git';
-import PrBot from '../src/index';
-import proxyquire from 'proxyquire';
-import { GitHubClient, OctokitClient, GhClient } from '../src/githubClient';
+import { OctokitClient, GhClient } from '../src/githubClient';
 
-import { ChildProcess } from 'child_process';
+
 
 describe('OctokitClient', () => {
     let octokitStub;
