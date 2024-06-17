@@ -83,11 +83,11 @@ export class PullCraft {
             githubToken: commanderOptions.githubToken || configOptions.githubToken || process.env.GITHUB_TOKEN,
             placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern
         };
-        // console.log('mergedOptions',                
-        //     openaiDefaults,
-        //     configOptions.openai,
-        //     commanderOptions.openai, 
-        //     mergedOptions);
+        console.log('mergedOptions',                
+            openaiDefaults,
+            configOptions.openai,
+            commanderOptions.openai, 
+            mergedOptions);
     
         // Assign merged options to instance variables
         this.openPr = mergedOptions.openPr;
@@ -258,10 +258,18 @@ export class PullCraft {
             throw error;
         }
     }
-
-    async getNewFiles(baseBranch: string, compareBranch: string): Promise<string>  {
+    async getNewFiles(baseBranch: string, compareBranch: string): Promise<string> {
         try {
-            const outcome = await this.git.diff(['--diff-filter=A', baseBranch, compareBranch, '--', '.', ...this.exclusions]);
+            console.log('EXLCUSIONS NEW FILES', this.exclusions)
+            const outcome = await this.git.raw([
+                'diff',
+                '--diff-filter=A',
+                baseBranch,
+                compareBranch,
+                '--',
+                '.',
+                ...this.exclusions
+            ]);
             return outcome;
         } catch (error: any) {
             console.error(`Error getting new files: ${error.message}`);
@@ -271,7 +279,15 @@ export class PullCraft {
 
     async getDiff(baseBranch: string, compareBranch: string): Promise<string> {
         try {
-            const outcome = await this.git.diff([baseBranch, compareBranch, '--', '.', ...this.exclusions]);
+            console.log('EXLCUSIONS DIFF', this.exclusions)
+            const outcome = await this.git.raw([
+                'diff',
+                baseBranch,
+                compareBranch,
+                '--',
+                '.',
+                ...this.exclusions
+            ]);
             return outcome;
         } catch (error: any) {
             console.error(`Error getting diff: ${error.message}`);
@@ -279,15 +295,22 @@ export class PullCraft {
         }
     }
 
-    async getFilenames(baseBranch: string, compareBranch: string): Promise<string>  {
+    async getFilenames(baseBranch: string, compareBranch: string): Promise<string> {
         try {
-            const outcome = await this.git.diff(['--name-only', baseBranch, compareBranch, '--', '.']);
+            console.log('EXLCUSIONS FILENAMES', this.exclusions)
+            const outcome = await this.git.raw([
+                'diff',
+                '--name-only',
+                baseBranch,
+                compareBranch
+            ]);
             return outcome;
         } catch (error: any) {
             console.error(`Error getting filenames: ${error.message}`);
             throw error;
         }
     }
+
 
     async differ(baseBranch = 'develop', compareBranch?: string): Promise<any|void> {
         try {
@@ -308,7 +331,7 @@ export class PullCraft {
             }
 
             const finalPrompt = this.buildTextPrompt({diff,newFiles,filenames});
-            // console.log('finalPrompt', finalPrompt)
+            console.log('finalPrompt', finalPrompt)
             const response = await this.gptCall(finalPrompt);
             return response;
         } catch (error: any) {

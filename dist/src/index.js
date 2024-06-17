@@ -73,11 +73,7 @@ class PullCraft {
             githubToken: commanderOptions.githubToken || configOptions.githubToken || process.env.GITHUB_TOKEN,
             placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern
         };
-        // console.log('mergedOptions',                
-        //     openaiDefaults,
-        //     configOptions.openai,
-        //     commanderOptions.openai, 
-        //     mergedOptions);
+        console.log('mergedOptions', openaiDefaults, configOptions.openai, commanderOptions.openai, mergedOptions);
         // Assign merged options to instance variables
         this.openPr = mergedOptions.openPr;
         this.exclusions = mergedOptions.exclusions;
@@ -242,7 +238,16 @@ class PullCraft {
     getNewFiles(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outcome = yield this.git.diff(['--diff-filter=A', baseBranch, compareBranch, '--', '.', ...this.exclusions]);
+                console.log('EXLCUSIONS NEW FILES', this.exclusions);
+                const outcome = yield this.git.raw([
+                    'diff',
+                    '--diff-filter=A',
+                    baseBranch,
+                    compareBranch,
+                    '--',
+                    '.',
+                    ...this.exclusions
+                ]);
                 return outcome;
             }
             catch (error) {
@@ -254,7 +259,15 @@ class PullCraft {
     getDiff(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outcome = yield this.git.diff([baseBranch, compareBranch, '--', '.', ...this.exclusions]);
+                console.log('EXLCUSIONS DIFF', this.exclusions);
+                const outcome = yield this.git.raw([
+                    'diff',
+                    baseBranch,
+                    compareBranch,
+                    '--',
+                    '.',
+                    ...this.exclusions
+                ]);
                 return outcome;
             }
             catch (error) {
@@ -266,7 +279,13 @@ class PullCraft {
     getFilenames(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outcome = yield this.git.diff(['--name-only', baseBranch, compareBranch, '--', '.']);
+                console.log('EXLCUSIONS FILENAMES', this.exclusions);
+                const outcome = yield this.git.raw([
+                    'diff',
+                    '--name-only',
+                    baseBranch,
+                    compareBranch
+                ]);
                 return outcome;
             }
             catch (error) {
@@ -288,7 +307,7 @@ class PullCraft {
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
                     compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-                // console.log('finalPrompt', finalPrompt)
+                console.log('finalPrompt', finalPrompt);
                 const response = yield this.gptCall(finalPrompt);
                 return response;
             }
