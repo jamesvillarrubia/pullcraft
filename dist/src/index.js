@@ -42,7 +42,7 @@ const openaiDefaults = {
     "systemPrompt": prompt_1.prompt,
     "titleTemplate": prompt_1.titleTemplate,
     "bodyTemplate": prompt_1.bodyTemplate,
-    "max_tokens": 1500,
+    "max_tokens": 3000,
     "n": 1,
     "stop": null,
     "temperature": 0.2
@@ -133,6 +133,7 @@ class PullCraft {
             try {
                 const osType = process.platform;
                 console.log(`Opening URL: ${url} on ${osType}`);
+                // console.log(JSON.stringify({url}, null, 2));
                 switch (osType) {
                     case "linux":
                         // Linux
@@ -167,22 +168,30 @@ class PullCraft {
                 const { owner, repo } = repoInfo;
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { owner,
                     repo });
-                const response = yield this.differ(baseBranch, compareBranch);
-                console.log('response', response);
+                let response = yield this.differ(baseBranch, compareBranch);
+                // console.log('creatPr->differ->response', response);
                 if (!response) {
+                    console.error("Error: Response could not be retrieved.");
+                    return;
+                }
+                try {
+                    response = JSON.parse(response);
+                }
+                catch (error) {
+                    console.log(error);
+                    console.log(JSON.stringify(response));
+                    console.error("Error: AI Response could not be parsed.", error.message);
+                    return;
+                }
+                let { title, body } = response;
+                if (!body) {
                     console.error("Error: PR body could not be retrieved.");
                     return;
                 }
-                // if (response.body) {
-                //     console.error("Error: PR body could not be retrieved.");
-                //     return;
-                // }
-                // const title = body.split('\n')[0].replace(/^# /, '');
-                // if (!title) {
-                //     console.error("Error: PR title could not be extracted from the PR body.");
-                //     return;
-                // }
-                let { title, body } = response;
+                if (!title) {
+                    console.error("Error: PR title could not be retrieved.");
+                    return;
+                }
                 const existingPrs = yield this.gitHubClient.listPulls({
                     owner,
                     repo,
@@ -192,8 +201,9 @@ class PullCraft {
                 if (existingPrs.length > 0) {
                     const pull_number = existingPrs[0].number;
                     console.log(`Updating existing PR #${pull_number}...`);
-                    yield this.openUrl('https://github.com/' + owner + '/' + repo + '/pull/' + pull_number);
+                    // console.log({owner, repo, pull_number, title, body})
                     yield this.gitHubClient.updatePull({ owner, repo, pull_number, title, body });
+                    this.openUrl('https://github.com/' + owner + '/' + repo + '/pull/' + pull_number);
                 }
                 else {
                     console.log("Creating a new PR...");
@@ -205,7 +215,7 @@ class PullCraft {
                         base: baseBranch,
                         head: compareBranch
                     });
-                    yield this.openUrl(response.data.html_url);
+                    // await this.openUrl(response.data.html_url);
                 }
             }
             catch (error) {
@@ -278,6 +288,7 @@ class PullCraft {
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
                     compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
+                // console.log('finalPrompt', finalPrompt)
                 const response = yield this.gptCall(finalPrompt);
                 return response;
             }
@@ -307,6 +318,7 @@ class PullCraft {
     }
     gptCall(prompt) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 const response = yield this.openai.chat.completions.create({
                     model: 'gpt-4-turbo',
@@ -320,8 +332,7 @@ class PullCraft {
                     ],
                     response_format: { "type": "json_object" }
                 });
-                console.log('response', response);
-                return response.choices[0].message;
+                return ((_a = response.choices[0].message) === null || _a === void 0 ? void 0 : _a.content) || '';
             }
             catch (error) {
                 console.error(`Error calling OpenAI API: ${error.message}`);

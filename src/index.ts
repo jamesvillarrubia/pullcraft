@@ -30,7 +30,7 @@ const openaiDefaults = {
     "systemPrompt": prompt,
     "titleTemplate": titleTemplate,
     "bodyTemplate": bodyTemplate,
-    "max_tokens": 1500,
+    "max_tokens": 3000,
     "n": 1,
     "stop": null,
     "temperature": 0.2  
@@ -151,6 +151,7 @@ export class PullCraft {
         try {
             const osType = process.platform;
             console.log(`Opening URL: ${url} on ${osType}`);
+            // console.log(JSON.stringify({url}, null, 2));
             switch (osType) {
                 case "linux":
                     // Linux
@@ -189,23 +190,32 @@ export class PullCraft {
                 repo
             }
 
-            const response = await this.differ(baseBranch, compareBranch);
-            console.log('response', response);
+            let response = await this.differ(baseBranch, compareBranch);
+            // console.log('creatPr->differ->response', response);
             if (!response) {
+                console.error("Error: Response could not be retrieved.");
+                return;
+            }
+            try {
+                response = JSON.parse(response);
+            } catch (error:any) {
+                console.log(error)
+                console.log(JSON.stringify(response))
+                console.error("Error: AI Response could not be parsed.", error.message);
+                return;
+            }
+            let { title, body } = response;
+
+
+            if (!body) {
                 console.error("Error: PR body could not be retrieved.");
                 return;
             }
-            // if (response.body) {
-            //     console.error("Error: PR body could not be retrieved.");
-            //     return;
-            // }
-            // const title = body.split('\n')[0].replace(/^# /, '');
+            if(!title) {
+                console.error("Error: PR title could not be retrieved.");
+                return;
+            }
 
-            // if (!title) {
-            //     console.error("Error: PR title could not be extracted from the PR body.");
-            //     return;
-            // }
-            let { title, body } = response;
 
             const existingPrs = await this.gitHubClient.listPulls({
                 owner,
@@ -216,8 +226,9 @@ export class PullCraft {
             if (existingPrs.length > 0) {
                 const pull_number = existingPrs[0].number;
                 console.log(`Updating existing PR #${pull_number}...`);
-                await this.openUrl('https://github.com/' + owner + '/' + repo + '/pull/' + pull_number);
+                // console.log({owner, repo, pull_number, title, body})
                 await this.gitHubClient.updatePull({owner, repo, pull_number, title, body});
+                this.openUrl('https://github.com/' + owner + '/' + repo + '/pull/' + pull_number);
             } else {
                 console.log("Creating a new PR...");
                 const response = await this.gitHubClient.createPull({
@@ -227,7 +238,7 @@ export class PullCraft {
                     body,
                     base: baseBranch,
                     head: compareBranch});
-                await this.openUrl(response.data.html_url);
+                // await this.openUrl(response.data.html_url);
             }
         } catch (error: any) {
             console.error(`Error creating PR: ${error.message}`);
@@ -297,6 +308,7 @@ export class PullCraft {
             }
 
             const finalPrompt = this.buildTextPrompt({diff,newFiles,filenames});
+            // console.log('finalPrompt', finalPrompt)
             const response = await this.gptCall(finalPrompt);
             return response;
         } catch (error: any) {
@@ -329,10 +341,6 @@ export class PullCraft {
         FILENAMES:\n${filenames}`
     }
 
-
-
-
-
     async gptCall(prompt: string) {
         try {
             const response = await this.openai.chat.completions.create({
@@ -348,8 +356,7 @@ export class PullCraft {
                 response_format:{"type": "json_object"}
 
             }); 
-            console.log('response', response);
-            return response.choices[0].message;
+            return response.choices[0].message?.content || '';
         } catch (error: any) {
             console.error(`Error calling OpenAI API: ${error.message}`);
         }
