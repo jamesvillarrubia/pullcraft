@@ -10,17 +10,17 @@ import { exec } from 'child_process';
 
 const configName = "pullcraft";
 const defaultExclusions = [
-    ":(exclude)***package-lock.json",
-    ":(exclude)***pnpm-lock.yaml",
-    ":(exclude)***yarn.lock",
-    ":(exclude)**/*.jpg",
-    ":(exclude)**/*.jpeg",
-    ":(exclude)**/*.png",
-    ":(exclude)**/*.gif",
-    ":(exclude)**/*.bmp",
-    ":(exclude)**/*.tiff",
-    ":(exclude)**/*.svg",
-    ":(exclude)**/*.pdf"
+    "***package-lock.json",
+    "***pnpm-lock.yaml",
+    "***yarn.lock",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.png",
+    "**/*.gif",
+    "**/*.bmp",
+    "**/*.tiff",
+    "**/*.svg",
+    "**/*.pdf"
 ];
 const githubStrategy = 'gh';
 const defaultOpenPr = true;
