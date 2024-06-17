@@ -49,6 +49,9 @@ const openaiDefaults = {
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
+function filterUndefined(obj) {
+    return Object.fromEntries(Object.entries(obj || {}).filter(([_, v]) => v !== undefined));
+}
 class PullCraft {
     constructor(commanderOptions) {
         var _a, _b;
@@ -57,17 +60,24 @@ class PullCraft {
         const explorer = (0, cosmiconfig_1.cosmiconfigSync)(configName, { searchStrategy: 'global' });
         const config = explorer.search();
         const configOptions = (config === null || config === void 0 ? void 0 : config.config) || {};
+        configOptions.openai = configOptions.openai || {};
         // Merge options: commanderOptions > configOptions > defaults
+        // console.log('commanderOptions', commanderOptions);
         const mergedOptions = {
             openPr: commanderOptions.openPr || configOptions.openPr || defaultOpenPr,
             exclusions: (commanderOptions.exclusions || configOptions.exclusions || defaultExclusions)
                 .map((exclusion) => `:(exclude)${exclusion}`),
             baseDefault: commanderOptions.baseDefault || configOptions.baseDefault || baseDefault,
-            openaiConfig: Object.assign(Object.assign(Object.assign(Object.assign({}, openaiDefaults), configOptions.openai), commanderOptions.openai), { apiKey: ((_a = commanderOptions.openai) === null || _a === void 0 ? void 0 : _a.apiKey) || ((_b = configOptions.openai) === null || _b === void 0 ? void 0 : _b.apiKey) || process.env.OPENAI_API_KEY }),
+            openaiConfig: Object.assign(openaiDefaults, filterUndefined(configOptions.openai), filterUndefined(commanderOptions.openai), { apiKey: ((_a = commanderOptions.openai) === null || _a === void 0 ? void 0 : _a.apiKey) || ((_b = configOptions.openai) === null || _b === void 0 ? void 0 : _b.apiKey) || process.env.OPENAI_API_KEY }),
             githubStrategy: commanderOptions.githubStrategy || configOptions.githubStrategy || githubStrategy,
             githubToken: commanderOptions.githubToken || configOptions.githubToken || process.env.GITHUB_TOKEN,
             placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern
         };
+        // console.log('mergedOptions',                
+        //     openaiDefaults,
+        //     configOptions.openai,
+        //     commanderOptions.openai, 
+        //     mergedOptions);
         // Assign merged options to instance variables
         this.openPr = mergedOptions.openPr;
         this.exclusions = mergedOptions.exclusions;
@@ -94,8 +104,13 @@ class PullCraft {
     }
     replacePlaceholders(template, replacements, placeholderPattern = this.placeholderPattern) {
         return template.replace(new RegExp(Object.keys(replacements).map(key => placeholderPattern.replace('KEY', key)).join('|'), 'g'), match => {
-            const key = match.replace(new RegExp(placeholderPattern.replace('KEY', '(.*)')), '$1');
-            return replacements.hasOwnProperty(key) ? replacements[key] : match;
+            if (match && placeholderPattern) {
+                const key = match.replace(new RegExp(placeholderPattern.replace('KEY', '(.*)')), '$1');
+                return replacements.hasOwnProperty(key) ? replacements[key] : match;
+            }
+            else {
+                return match;
+            }
         });
     }
     isGhCliAvailable() {
@@ -152,16 +167,22 @@ class PullCraft {
                 const { owner, repo } = repoInfo;
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { owner,
                     repo });
-                const body = yield this.differ(baseBranch, compareBranch);
-                if (!body) {
+                const response = yield this.differ(baseBranch, compareBranch);
+                console.log('response', response);
+                if (!response) {
                     console.error("Error: PR body could not be retrieved.");
                     return;
                 }
-                const title = body.split('\n')[0].replace(/^# /, '');
-                if (!title) {
-                    console.error("Error: PR title could not be extracted from the PR body.");
-                    return;
-                }
+                // if (response.body) {
+                //     console.error("Error: PR body could not be retrieved.");
+                //     return;
+                // }
+                // const title = body.split('\n')[0].replace(/^# /, '');
+                // if (!title) {
+                //     console.error("Error: PR title could not be extracted from the PR body.");
+                //     return;
+                // }
+                let { title, body } = response;
                 const existingPrs = yield this.gitHubClient.listPulls({
                     owner,
                     repo,
@@ -257,7 +278,6 @@ class PullCraft {
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
                     compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-                // console.log('finalPrompt', finalPrompt);
                 const response = yield this.gptCall(finalPrompt);
                 return response;
             }
@@ -270,6 +290,7 @@ class PullCraft {
         const replace = (template) => {
             return this.replacePlaceholders(template, Object.assign(Object.assign({}, this.replacements), this.standardReplacements), this.placeholderPattern);
         };
+        // console.log(this.openaiConfig.titleTemplate, this.openaiConfig.bodyTemplate);
         let title = replace(this.openaiConfig.titleTemplate);
         let body = replace(this.openaiConfig.bodyTemplate);
         return `
@@ -294,12 +315,13 @@ class PullCraft {
                     stop: null,
                     temperature: 0.2,
                     messages: [
-                        { "role": "system", "content": this.openaiConfig.prompt },
+                        { "role": "system", "content": this.openaiConfig.systemPrompt },
                         { "role": "user", "content": prompt }
                     ],
                     response_format: { "type": "json_object" }
                 });
-                return response.choices[0].text.trim();
+                console.log('response', response);
+                return response.choices[0].message;
             }
             catch (error) {
                 console.error(`Error calling OpenAI API: ${error.message}`);

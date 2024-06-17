@@ -14,7 +14,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "build": "npx tsc; rm -rf ./dist/test;",
+    "build": "rm -rf ./dist; npx tsc; rm -rf ./dist/test; chmod +x ./dist/bin/pullcraft.js",
     "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha",
     "test:dev": "echo '\\033c' && npm run lint; npm run mocha:dev",
     "coverage": "nyc npm test",
@@ -56,6 +56,7 @@
     "node-fetch": "^3.3.2",
     "open": "^10.1.0",
     "openai": "^4.51.0",
+    "pullcraft": "^0.0.0-releaseit",
     "shelljs": "^0.8.5",
     "simple-git": "^3.25.0"
   },
