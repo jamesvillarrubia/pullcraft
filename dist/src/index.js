@@ -122,7 +122,7 @@ class PrBot {
     replacePlaceholders(template, replacements, placeholderPattern = this.placeholderPattern) {
         return template.replace(new RegExp(Object.keys(replacements).map(key => placeholderPattern.replace('KEY', key)).join('|'), 'g'), match => {
             const key = match.replace(new RegExp(placeholderPattern.replace('KEY', '(.*)')), '$1');
-            return replacements[key];
+            return replacements.hasOwnProperty(key) ? replacements[key] : match;
         });
     }
     isGhCliAvailable() {
@@ -177,9 +177,7 @@ class PrBot {
                     return;
                 }
                 const { owner, repo } = repoInfo;
-                this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
-                    compareBranch,
-                    owner,
+                this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { owner,
                     repo });
                 const body = yield this.differ(baseBranch, compareBranch);
                 if (!body) {
@@ -229,9 +227,11 @@ class PrBot {
                 if (match) {
                     return { owner: match[1], repo: match[2] };
                 }
+                throw new Error(`Failed to get repo info from ${repoUrl}`);
             }
             catch (error) {
                 console.error(`Failed to get repo info`);
+                throw error;
             }
         });
     }
@@ -243,6 +243,7 @@ class PrBot {
             }
             catch (error) {
                 console.error(`Error getting new files: ${error.message}`);
+                throw error;
             }
         });
     }
@@ -254,6 +255,7 @@ class PrBot {
             }
             catch (error) {
                 console.error(`Error getting diff: ${error.message}`);
+                throw error;
             }
         });
     }
@@ -265,6 +267,7 @@ class PrBot {
             }
             catch (error) {
                 console.error(`Error getting filenames: ${error.message}`);
+                throw error;
             }
         });
     }
@@ -278,8 +281,10 @@ class PrBot {
                 if (!diff && !newFiles) {
                     return "No changes found between the specified branches.";
                 }
+                this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
+                    compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-                console.log('finalPrompt', finalPrompt);
+                // console.log('finalPrompt', finalPrompt);
                 const response = yield this.gptCall(finalPrompt);
                 return response;
             }
@@ -290,12 +295,14 @@ class PrBot {
     }
     buildTextPrompt({ diff, newFiles, filenames }) {
         const replace = (template) => {
-            return this.replacePlaceholders(this.openaiConfig.template, Object.assign(Object.assign({}, this.replacements), this.standardReplacements), this.placeholderPattern);
+            return this.replacePlaceholders(template, Object.assign(Object.assign({}, this.replacements), this.standardReplacements), this.placeholderPattern);
         };
+        let title = replace(this.openaiConfig.titleTemplate);
+        let body = replace(this.openaiConfig.bodyTemplate);
         return `
         json TEMPLATE:\n{\n
-            "title": ${replace(this.openaiConfig.title)},\n
-            "body": ${replace(this.openaiConfig.body)},\n
+            "title": ${title},\n
+            "body": ${body},\n
         }\n
         \n--------\n
         DIFF:\n${diff}

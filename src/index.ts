@@ -8,36 +8,6 @@ import { GitHubClient, OctokitClient, GhClient } from './githubClient';
 import { exec } from 'child_process';
 
 
-// {
-//     "exclusions": [
-//         ":(exclude)**/package-lock.json",
-//         ":(exclude)**/pnpm-lock.yaml",
-//         ":(exclude)**/yarn.lock",
-//         ":(exclude)**/*.jpg",
-//         ":(exclude)**/*.jpeg",
-//         ":(exclude)**/*.png",
-//         ":(exclude)**/*.gif",
-//         ":(exclude)**/*.bmp",
-//         ":(exclude)**/*.tiff",
-//         ":(exclude)**/*.svg",
-//         ":(exclude)**/*.pdf"
-//     ],
-//     "openPr": true,
-//     "githubStrategy": "gh",
-//     "openAi":{
-//         "apiKey": "YOUR_OPENAI_API_KEY",
-//         "url": "https://api.openai.com/v1/chat/completions",
-//         "model": "gpt-3.5-turbo-instruct",
-//         "prompt": "YOUR_PROMPT_HERE",
-//         "max_tokens": 1500,
-//         "n": 1,
-//         "stop": null,
-//         "temperature": 0.2  
-//     }
-
-// }
-
-
 const configName = "prbot";
 const defaultExclusions = [
     ":(exclude)**/package-lock.json",
@@ -195,8 +165,6 @@ export class PrBot {
 
             this.standardReplacements = {
                 ...this.standardReplacements,
-                baseBranch,
-                compareBranch,
                 owner,
                 repo
             }
@@ -233,7 +201,7 @@ export class PrBot {
                     body,
                     base: baseBranch,
                     head: compareBranch});
-                await this.openUrl(response.url);
+                await this.openUrl(response.data.html_url);
             }
         } catch (error: any) {
             console.error(`Error creating PR: ${error.message}`);
@@ -284,9 +252,9 @@ export class PrBot {
         }
     }
 
-    async differ(baseBranch = 'develop', compareBranch: string): Promise<string|void> {
+    async differ(baseBranch = 'develop', compareBranch?: string): Promise<string|void> {
         try {
-            compareBranch = compareBranch || (await this.git.revparse(['--abbrev-ref', 'HEAD'])).trim();
+            compareBranch = compareBranch || (await this.git.revparse(['--abbrev-ref', 'HEAD'])).trim() as string;
 
             const diff = await this.getDiff(baseBranch, compareBranch);
             const newFiles = await this.getNewFiles(baseBranch, compareBranch);
@@ -295,9 +263,15 @@ export class PrBot {
             if (!diff && !newFiles) {
                 return "No changes found between the specified branches.";
             }
+            
+            this.standardReplacements = {
+                ...this.standardReplacements,
+                baseBranch,
+                compareBranch
+            }
 
             const finalPrompt = this.buildTextPrompt({diff,newFiles,filenames});
-            console.log('finalPrompt', finalPrompt);
+            // console.log('finalPrompt', finalPrompt);
             const response = await this.gptCall(finalPrompt);
             return response;
         } catch (error: any) {
@@ -313,10 +287,14 @@ export class PrBot {
                 ...this.standardReplacements
             }, this.placeholderPattern);
         }
+
+        let title = replace(this.openaiConfig.titleTemplate);
+        let body = replace(this.openaiConfig.bodyTemplate);
+
         return `
         json TEMPLATE:\n{\n
-            "title": ${replace(this.openaiConfig.titleTemplate)},\n
-            "body": ${replace(this.openaiConfig.bodyTemplate)},\n
+            "title": ${title},\n
+            "body": ${body},\n
         }\n
         \n--------\n
         DIFF:\n${diff}

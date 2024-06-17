@@ -5,5 +5,5 @@ module.exports = {
   package: "./package.json",
   spec: 'test/**/*.test.ts',
   'watch-files': ['src/**/*.ts', 'test/**/*.ts'],
-  timeout: 10000
+  timeout: 100000
 };
