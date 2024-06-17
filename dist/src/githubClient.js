@@ -52,6 +52,9 @@ class OctokitClient extends GitHubClient {
     }
 }
 exports.OctokitClient = OctokitClient;
+function escapeShellArg(arg) {
+    return arg.replace(/`/g, '\\`');
+}
 class GhClient extends GitHubClient {
     listPulls(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head }) {
@@ -61,12 +64,16 @@ class GhClient extends GitHubClient {
     }
     updatePull(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, pull_number, title, body }) {
-            (0, child_process_1.execSync)(`gh pr edit ${pull_number} --repo ${owner}/${repo} --title "${title}" --body "${body}"`);
+            const escapedTitle = escapeShellArg(title);
+            const escapedBody = escapeShellArg(body);
+            (0, child_process_1.execSync)(`gh pr edit ${pull_number} --repo ${owner}/${repo} --title "${escapedTitle}" --body "${escapedBody}"`);
         });
     }
     createPull(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head, title, body }) {
-            const result = (0, child_process_1.execSync)(`gh pr create --repo ${owner}/${repo} --base ${base} --head ${head} --title "${title}" --body "${body}"`).toString();
+            const escapedTitle = escapeShellArg(title);
+            const escapedBody = escapeShellArg(body);
+            const result = (0, child_process_1.execSync)(`gh pr create --repo ${owner}/${repo} --base ${base} --head ${head} --title "${escapedTitle}" --body "${escapedBody}"`).toString();
             return { data: { html_url: result } };
         });
     }

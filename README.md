@@ -3,7 +3,7 @@
 1. Deploying to NPM and/or Github
 2. Want semantic version control
 3. Want automated versioning based on commits and/or PRs
-4. (Optional) Want to use PrBot for PR summaries
+4. (Optional) Want to use PullCraft for PR summaries
 
 
 # Versioning Pattern in Git is Github Flow
