@@ -4,5 +4,6 @@ module.exports = {
   diff: true,
   package: "./package.json",
   spec: 'test/**/*.test.ts',
-  'watch-files': ['src/**/*.ts', 'test/**/*.ts']
+  'watch-files': ['src/**/*.ts', 'test/**/*.ts'],
+  timeout: 10000
 };

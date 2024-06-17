@@ -1,0 +1,34 @@
+{
+    "exclusions": [
+        ":(exclude)**/package-lock.json",
+        ":(exclude)**/pnpm-lock.yaml",
+        ":(exclude)**/yarn.lock",
+        ":(exclude)**/*.jpg",
+        ":(exclude)**/*.jpeg",
+        ":(exclude)**/*.png",
+        ":(exclude)**/*.gif",
+        ":(exclude)**/*.bmp",
+        ":(exclude)**/*.tiff",
+        ":(exclude)**/*.svg",
+        ":(exclude)**/*.pdf"
+    ],
+
+    "openPr": true,
+    "githubStrategy": "gh",
+
+    "openai":{
+        "apiKey": "YOUR_OPENAI_API_KEY",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "model": "gpt-3.5-turbo-instruct",
+        "max_tokens": 1500,
+        "n": 1,
+        "stop": null,
+        "temperature": 0.2,
+
+        "placeholderPattern": "__KEY__",
+        "systemPrompt": "YOUR_PROMPT_HERE",
+        "titleTemplate": "YOUR_TEMPLATE_HERE",
+        "bodyTemplate": "YOUR_TEMPLATE_HERE"
+    }
+
+}

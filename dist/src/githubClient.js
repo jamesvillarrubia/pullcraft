@@ -67,7 +67,7 @@ class GhClient extends GitHubClient {
     createPull(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head, title, body }) {
             const result = (0, child_process_1.execSync)(`gh pr create --repo ${owner}/${repo} --base ${base} --head ${head} --title "${title}" --body "${body}"`).toString();
-            return {url:result};
+            return { data: { html_url: result } };
         });
     }
 }

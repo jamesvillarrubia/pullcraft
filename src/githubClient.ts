@@ -1,10 +1,4 @@
 import { Octokit } from '@octokit/rest';
-import simpleGit from 'simple-git';
-import { prompt } from './prompt';
-import { cosmiconfigSync } from 'cosmiconfig';
-import OpenAI from 'openai';
-import { openUrl } from './openWrapper'; // Import the openUrl function
-import { ChildProcess } from 'child_process';
 import { execSync } from 'child_process';
 
 
