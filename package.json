@@ -1,6 +1,6 @@
 {
   "name": "pullcraft",
-  "version": "0.0.0-releaseit",
+  "version": "0.0.1",
   "description": "A CLI tool to create pull requests on GitHub by comparing branches and using OpenAI to generate PR text.",
   "main": "src",
   "types": "src/",
