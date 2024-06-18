@@ -21,7 +21,7 @@
     "release": "release-it --dry-run --ci --config .release-it.js"
   },
   "bin": {
-    "pullcraft": "./dist/bin/pullcraft.js"
+    "pullcraft": "dist/bin/pullcraft.js"
   },
   "devDependencies": {
     "@babel/register": "^7.24.6",
