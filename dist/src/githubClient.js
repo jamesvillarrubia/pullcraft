@@ -15,17 +15,17 @@ const child_process_1 = require("child_process");
 class GitHubClient {
     listPulls(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head }) {
-            throw new Error("Not implemented");
+            throw new Error('Not implemented');
         });
     }
     updatePull(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pull_number, title, body }) {
-            throw new Error("Not implemented");
+        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pullNumber, title, body }) {
+            throw new Error('Not implemented');
         });
     }
     createPull(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head, title, body }) {
-            throw new Error("Not implemented");
+            throw new Error('Not implemented');
         });
     }
 }
@@ -41,8 +41,8 @@ class OctokitClient extends GitHubClient {
         });
     }
     updatePull(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pull_number, title, body }) {
-            return this.octokit.pulls.update({ owner, repo, pull_number, title, body });
+        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pullNumber, title, body }) {
+            return this.octokit.pulls.update({ owner, repo, pullNumber, title, body });
         });
     }
     createPull(_a) {
@@ -63,10 +63,10 @@ class GhClient extends GitHubClient {
         });
     }
     updatePull(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pull_number, title, body }) {
+        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pullNumber, title, body }) {
             const escapedTitle = escapeShellArg(title);
             const escapedBody = escapeShellArg(body);
-            (0, child_process_1.execSync)(`gh pr edit ${pull_number} --repo ${owner}/${repo} --title "${escapedTitle}" --body "${escapedBody}"`);
+            (0, child_process_1.execSync)(`gh pr edit ${pullNumber} --repo ${owner}/${repo} --title "${escapedTitle}" --body "${escapedBody}"`);
         });
     }
     createPull(_a) {
