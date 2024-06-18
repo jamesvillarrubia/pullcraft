@@ -41,7 +41,7 @@ jobs:
   #       run: npm run coverage
   release:
     name: Release
-    needs: test
+    # needs: test
     if: github.ref_name == 'main'
     runs-on: ubuntu-latest
     env:
@@ -62,7 +62,7 @@ jobs:
       - run: npm run build --if-present
       - run: npx release-it --ci
   prerelease:
-    needs: test
+    # needs: test
     name: PreRelease
     if: github.ref_name != 'main'
     runs-on: ubuntu-latest
