@@ -212,7 +212,7 @@ class PullCraft {
                         base: baseBranch,
                         head: compareBranch
                     });
-                    yield this.openUrl(response.data.html_url);
+                    yield this.openUrl(response.data.html_url.replace(/%0A$/, ''));
                 }
             }
             catch (error) {
