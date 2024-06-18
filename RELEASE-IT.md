@@ -282,3 +282,18 @@ git push --tags
 
 
 Next you need to make an npm library 
+
+
+
+
+
+
+Make sure to set the workflow permissions
+```
+gh api \
+  -X PUT \
+  -H "Accept: application/vnd.github+json" \
+  "/repos/{owner}/{repo}/actions/permissions/workflow" \
+  -f default_workflow_permissions=write \
+  -f can_approve_pull_request_reviews=true
+```
