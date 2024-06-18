@@ -19,33 +19,32 @@ const cosmiconfig_1 = require("cosmiconfig");
 const openai_1 = __importDefault(require("openai"));
 const child_process_1 = require("child_process");
 const githubClient_1 = require("./githubClient");
-const child_process_2 = require("child_process");
-const configName = "pullcraft";
+const configName = 'pullcraft';
 const defaultExclusions = [
-    "***package-lock.json",
-    "***pnpm-lock.yaml",
-    "***yarn.lock",
-    "**/*.jpg",
-    "**/*.jpeg",
-    "**/*.png",
-    "**/*.gif",
-    "**/*.bmp",
-    "**/*.tiff",
-    "**/*.svg",
-    "**/*.pdf"
+    '***package-lock.json',
+    '***pnpm-lock.yaml',
+    '***yarn.lock',
+    '**/*.jpg',
+    '**/*.jpeg',
+    '**/*.png',
+    '**/*.gif',
+    '**/*.bmp',
+    '**/*.tiff',
+    '**/*.svg',
+    '**/*.pdf'
 ];
 const githubStrategy = 'gh';
 const defaultOpenPr = true;
 const openaiDefaults = {
-    "url": "https://api.openai.com/v1/chat/completions",
-    "model": "gpt-3.5-turbo-instruct",
-    "systemPrompt": prompt_1.prompt,
-    "titleTemplate": prompt_1.titleTemplate,
-    "bodyTemplate": prompt_1.bodyTemplate,
-    "max_tokens": 3000,
-    "n": 1,
-    "stop": null,
-    "temperature": 0.2
+    url: 'https://api.openai.com/v1/chat/completions',
+    model: 'gpt-3.5-turbo-instruct',
+    systemPrompt: prompt_1.prompt,
+    titleTemplate: prompt_1.titleTemplate,
+    bodyTemplate: prompt_1.bodyTemplate,
+    max_tokens: 3000,
+    n: 1,
+    stop: null,
+    temperature: 0.2
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
@@ -73,11 +72,11 @@ class PullCraft {
             githubToken: commanderOptions.githubToken || configOptions.githubToken || process.env.GITHUB_TOKEN,
             placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern
         };
-        // console.log('mergedOptions',                
-        //     openaiDefaults,
-        //     configOptions.openai,
-        //     commanderOptions.openai, 
-        //     mergedOptions);
+        // console.log('mergedOptions',
+        //   openaiDefaults,
+        //   configOptions.openai,
+        //   commanderOptions.openai,
+        //   mergedOptions);
         // Assign merged options to instance variables
         this.openPr = mergedOptions.openPr;
         this.exclusions = mergedOptions.exclusions;
@@ -88,15 +87,15 @@ class PullCraft {
         this.placeholderPattern = mergedOptions.placeholderPattern;
         // Set the OpenAI API key
         if (!this.openaiConfig.apiKey) {
-            throw new Error("Error: OPENAI_API_KEY is not set");
+            throw new Error('Error: OPENAI_API_KEY is not set');
         }
         this.openai = new openai_1.default({ apiKey: this.openaiConfig.apiKey });
         // Set the GitHub client
         if (this.githubStrategy !== 'gh' && this.githubStrategy !== 'octokit') {
-            throw new Error("Error: githubStrategy must be 'gh' or 'octokit'. Defaults to 'gh'.");
+            throw new Error('Error: githubStrategy must be \'gh\' or \'octokit\'. Defaults to \'gh\'.');
         }
         if (!this.githubToken && this.githubStrategy === 'octokit') {
-            throw new Error("Error: GITHUB_TOKEN is not set");
+            throw new Error('Error: GITHUB_TOKEN is not set');
         }
         this.gitHubClient = (this.githubStrategy === 'gh' && this.isGhCliAvailable()) ? new githubClient_1.GhClient() : new githubClient_1.OctokitClient(this.githubToken);
         // Set the Git client
@@ -106,7 +105,7 @@ class PullCraft {
         return template.replace(new RegExp(Object.keys(replacements).map(key => placeholderPattern.replace('KEY', key)).join('|'), 'g'), match => {
             if (match && placeholderPattern) {
                 const key = match.replace(new RegExp(placeholderPattern.replace('KEY', '(.*)')), '$1');
-                return replacements.hasOwnProperty(key) ? replacements[key] : match;
+                return Object.prototype.hasOwnProperty.call(replacements, key) ? replacements[key] : match;
             }
             else {
                 return match;
@@ -125,8 +124,8 @@ class PullCraft {
     openUrl(url) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!url) {
-                console.error("Error: Please provide a value for the argument.");
-                throw new Error("Error: URL is required");
+                console.error('Error: Please provide a value for the argument.');
+                throw new Error('Error: URL is required');
             }
             if (this.openPr === false)
                 return;
@@ -135,18 +134,17 @@ class PullCraft {
                 console.log(`Opening URL: ${url} on ${osType}`);
                 // console.log(JSON.stringify({url}, null, 2));
                 switch (osType) {
-                    case "linux":
+                    case 'linux':
                         // Linux
-                        return (0, child_process_2.exec)(`xdg-open "${url}"`);
-                    case "darwin":
+                        return (0, child_process_1.exec)(`xdg-open "${url}"`);
+                    case 'darwin':
                         // macOS
-                        return (0, child_process_2.exec)(`open "${url}"`);
-                    case "win32":
+                        return (0, child_process_1.exec)(`open "${url}"`);
+                    case 'win32':
                         // Windows
-                        return (0, child_process_2.exec)(`start "${url}"`);
+                        return (0, child_process_1.exec)(`start "${url}"`);
                     default:
-                        console.error("Unsupported OS");
-                        return;
+                        console.error('Unsupported OS');
                 }
             }
             catch (error) {
@@ -162,7 +160,7 @@ class PullCraft {
                 console.log(`Comparing branches: ${baseBranch} and ${compareBranch}`);
                 const repoInfo = yield this.getRepoInfo();
                 if (!repoInfo) {
-                    console.error("Error: Repository information could not be retrieved.");
+                    console.error('Error: Repository information could not be retrieved.');
                     return;
                 }
                 const { owner, repo } = repoInfo;
@@ -171,7 +169,7 @@ class PullCraft {
                 let response = yield this.differ(baseBranch, compareBranch);
                 // console.log('creatPr->differ->response', response);
                 if (!response) {
-                    console.error("Error: Response could not be retrieved.");
+                    console.error('Error: Response could not be retrieved.');
                     return;
                 }
                 try {
@@ -180,16 +178,16 @@ class PullCraft {
                 catch (error) {
                     console.log(error);
                     console.log(JSON.stringify(response));
-                    console.error("Error: AI Response could not be parsed.", error.message);
+                    console.error('Error: AI Response could not be parsed.', error.message);
                     return;
                 }
-                let { title, body } = response;
+                const { title, body } = response;
                 if (!body) {
-                    console.error("Error: PR body could not be retrieved.");
+                    console.error('Error: PR body could not be retrieved.');
                     return;
                 }
                 if (!title) {
-                    console.error("Error: PR title could not be retrieved.");
+                    console.error('Error: PR title could not be retrieved.');
                     return;
                 }
                 const existingPrs = yield this.gitHubClient.listPulls({
@@ -199,14 +197,13 @@ class PullCraft {
                     head: compareBranch
                 });
                 if (existingPrs.length > 0) {
-                    const pull_number = existingPrs[0].number;
-                    console.log(`Updating existing PR #${pull_number}...`);
-                    // console.log({owner, repo, pull_number, title, body})
-                    yield this.gitHubClient.updatePull({ owner, repo, pull_number, title, body });
-                    this.openUrl('https://github.com/' + owner + '/' + repo + '/pull/' + pull_number);
+                    const pullNumber = existingPrs[0].number;
+                    console.log(`Updating existing PR #${pullNumber}...`);
+                    yield this.gitHubClient.updatePull({ owner, repo, pullNumber, title, body });
+                    yield this.openUrl('https://github.com/' + owner + '/' + repo + '/pull/' + pullNumber);
                 }
                 else {
-                    console.log("Creating a new PR...");
+                    console.log('Creating a new PR...');
                     const response = yield this.gitHubClient.createPull({
                         owner,
                         repo,
@@ -215,7 +212,7 @@ class PullCraft {
                         base: baseBranch,
                         head: compareBranch
                     });
-                    // await this.openUrl(response.data.html_url);
+                    yield this.openUrl(response.data.html_url);
                 }
             }
             catch (error) {
@@ -234,7 +231,7 @@ class PullCraft {
                 throw new Error(`Failed to get repo info from ${repoUrl}`);
             }
             catch (error) {
-                console.error(`Failed to get repo info`);
+                console.error('Failed to get repo info');
                 throw error;
             }
         });
@@ -242,7 +239,16 @@ class PullCraft {
     getNewFiles(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outcome = yield this.git.diff(['--diff-filter=A', baseBranch, compareBranch, '--', '.', ...this.exclusions]);
+                // console.log('EXLCUSIONS NEW FILES', this.exclusions);
+                const outcome = yield this.git.raw([
+                    'diff',
+                    '--diff-filter=A',
+                    baseBranch,
+                    compareBranch,
+                    '--',
+                    '.',
+                    ...this.exclusions
+                ]);
                 return outcome;
             }
             catch (error) {
@@ -254,7 +260,15 @@ class PullCraft {
     getDiff(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outcome = yield this.git.diff([baseBranch, compareBranch, '--', '.', ...this.exclusions]);
+                // console.log('EXLCUSIONS DIFF', this.exclusions);
+                const outcome = yield this.git.raw([
+                    'diff',
+                    baseBranch,
+                    compareBranch,
+                    '--',
+                    '.',
+                    ...this.exclusions
+                ]);
                 return outcome;
             }
             catch (error) {
@@ -266,7 +280,13 @@ class PullCraft {
     getFilenames(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outcome = yield this.git.diff(['--name-only', baseBranch, compareBranch, '--', '.']);
+                // console.log('EXLCUSIONS FILENAMES', this.exclusions);
+                const outcome = yield this.git.raw([
+                    'diff',
+                    '--name-only',
+                    baseBranch,
+                    compareBranch
+                ]);
                 return outcome;
             }
             catch (error) {
@@ -283,12 +303,12 @@ class PullCraft {
                 const newFiles = yield this.getNewFiles(baseBranch, compareBranch);
                 const filenames = yield this.getFilenames(baseBranch, compareBranch);
                 if (!diff && !newFiles) {
-                    return "No changes found between the specified branches.";
+                    return 'No changes found between the specified branches.';
                 }
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
                     compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-                // console.log('finalPrompt', finalPrompt)
+                // console.log('finalPrompt', finalPrompt);
                 const response = yield this.gptCall(finalPrompt);
                 return response;
             }
@@ -302,8 +322,8 @@ class PullCraft {
             return this.replacePlaceholders(template, Object.assign(Object.assign({}, this.replacements), this.standardReplacements), this.placeholderPattern);
         };
         // console.log(this.openaiConfig.titleTemplate, this.openaiConfig.bodyTemplate);
-        let title = replace(this.openaiConfig.titleTemplate);
-        let body = replace(this.openaiConfig.bodyTemplate);
+        const title = replace(this.openaiConfig.titleTemplate);
+        const body = replace(this.openaiConfig.bodyTemplate);
         return `
         json TEMPLATE:\n{\n
             "title": ${title},\n
@@ -327,10 +347,10 @@ class PullCraft {
                     stop: null,
                     temperature: 0.2,
                     messages: [
-                        { "role": "system", "content": this.openaiConfig.systemPrompt },
-                        { "role": "user", "content": prompt }
+                        { role: 'system', content: this.openaiConfig.systemPrompt },
+                        { role: 'user', content: prompt }
                     ],
-                    response_format: { "type": "json_object" }
+                    response_format: { type: 'json_object' }
                 });
                 return ((_a = response.choices[0].message) === null || _a === void 0 ? void 0 : _a.content) || '';
             }

@@ -1,0 +1,33 @@
+name: Update dependencies
+
+on:  
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - run: npm ci
+    - run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git checkout -b update-dependencies-$GITHUB_RUN_ID
+    - run: |
+        npx npm-check-updates -u
+        npm install
+    - run: |
+        git commit -am "chore(dependencies): Update dependencies"
+        git push origin update-dependencies-$GITHUB_RUN_ID
+    - run: |
+        gh pr create --title "chore(dependencies): Update all dependencies" --body ""
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GH_CI_TOKEN}}
+        # THIS TOKEN EXPIRES 03/02/2024
+        

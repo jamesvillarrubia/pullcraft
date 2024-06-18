@@ -3,10 +3,10 @@
 import PullCraft from '../src/index'; // Adjust the path to where your PullCraft class is located
 import dotenv from 'dotenv';
 
+import { Command } from 'commander';
+
 // Load environment variables from a .env file if it exists
 dotenv.config();
-
-import { Command } from 'commander';
 const program = new Command();
 
 program
@@ -36,26 +36,26 @@ const compareBranch = program.args[1] || options.compareBranch;
 
 // Convert to nested option
 const nested = {
-    exclusions: options.exclusions,
-    openPr: options.openPr,
-    githubStrategy: options.githubStrategy,
-    openai: {
-        apiKey: options.apiKey,
-        url: options.url,
-        model: options.model,
-        maxTokens: options.maxTokens,
-        n: options.n,
-        stop: options.stop,
-        temp: options.temp,
-        systemPrompt: options.systemPrompt,
-        placeholderPattern: options.placeholderPattern,
-        titleTemplate: options.titleTemplate,
-        bodyTemplate: options.bodyTemplate
-    }
-}
+  exclusions: options.exclusions,
+  openPr: options.openPr,
+  githubStrategy: options.githubStrategy,
+  openai: {
+    apiKey: options.apiKey,
+    url: options.url,
+    model: options.model,
+    maxTokens: options.maxTokens,
+    n: options.n,
+    stop: options.stop,
+    temp: options.temp,
+    systemPrompt: options.systemPrompt,
+    placeholderPattern: options.placeholderPattern,
+    titleTemplate: options.titleTemplate,
+    bodyTemplate: options.bodyTemplate
+  }
+};
 
 const pullCraft = new PullCraft(nested);
 pullCraft.createPr(baseBranch, compareBranch).catch((error: any) => {
-    console.error(`Error creating PR: ${error.message}`);
-    process.exit(1);
+  console.error(`Error creating PR: ${error.message}`);
+  process.exit(1);
 });

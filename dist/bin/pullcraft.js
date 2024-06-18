@@ -6,9 +6,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = __importDefault(require("../src/index")); // Adjust the path to where your PullCraft class is located
 const dotenv_1 = __importDefault(require("dotenv"));
+const commander_1 = require("commander");
 // Load environment variables from a .env file if it exists
 dotenv_1.default.config();
-const commander_1 = require("commander");
 const program = new commander_1.Command();
 program
     .version('1.0.0')

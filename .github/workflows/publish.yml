@@ -1,0 +1,83 @@
+name: Publish
+
+on: 
+  workflow_dispatch:
+  push: 
+    branches:
+      - main
+      - beta
+      - alpha
+
+jobs:
+  test: 
+    name: 'Node.js v${{ matrix.node }}'
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    strategy:
+      matrix:
+        node:
+          - 18
+          - 20
+          - 22
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '${{ matrix.node }}'
+      - uses: actions/checkout@v4
+      - name: 'Cache node_modules'
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-v${{ matrix.node }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-v${{ matrix.node }}-
+      - name: Install dependencies
+        run: npm ci
+      - name: Run linters
+        run: npm run lint
+      - name: Run tests
+        run: npm run coverage
+  release:
+    name: Release
+    needs: test
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npx release-it --ci
+  prerelease:
+    needs: test
+    name: PreRelease
+    if: github.ref_name != 'main'
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npx release-it --ci --preRelease=${{github.ref_name}}
