@@ -157,8 +157,14 @@ describe('PullCraft', () => {
   });
 
   describe('getRepoInfo', () => {
-    it('should get repository info', async () => {
+    it('should get repository info with ssh', async () => {
       sinon.stub(pullCraft.git, 'raw').resolves('git@github.com:owner/repo.git\n');
+      const repoInfo = await pullCraft.getRepoInfo();
+      expect(repoInfo).to.deep.equal({ owner: 'owner', repo: 'repo' });
+    });
+
+    it('should get repository info with https', async () => {
+      sinon.stub(pullCraft.git, 'raw').resolves('https://github.com/owner/repo\n');
       const repoInfo = await pullCraft.getRepoInfo();
       expect(repoInfo).to.deep.equal({ owner: 'owner', repo: 'repo' });
     });

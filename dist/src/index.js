@@ -224,7 +224,7 @@ class PullCraft {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const repoUrl = yield this.git.raw(['config', '--get', 'remote.origin.url']);
-                const match = repoUrl.match(/github\.com[:/](.+?)\/(.+?)\.git/);
+                const match = repoUrl.trim().match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
                 if (match) {
                     return { owner: match[1], repo: match[2] };
                 }
