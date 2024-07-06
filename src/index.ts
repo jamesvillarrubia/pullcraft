@@ -240,7 +240,7 @@ export class PullCraft {
   async getRepoInfo (): Promise<{ owner: string, repo: string }> {
     try {
       const repoUrl = await this.git.raw(['config', '--get', 'remote.origin.url']);
-      const match = repoUrl.match(/github\.com[:/](.+?)\/(.+?)\.git/);
+      const match = repoUrl.trim().match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
       if (match) {
         return { owner: match[1], repo: match[2] };
       }
