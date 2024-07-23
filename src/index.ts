@@ -230,6 +230,7 @@ export class PullCraft {
           base: baseBranch,
           head: compareBranch
         });
+        console.log(JSON.stringify({ url: `${response.data.html_url}` }));
         await this.openUrl(response.data.html_url.trim().replace('\n', ''));
       }
     } catch (error: any) {
