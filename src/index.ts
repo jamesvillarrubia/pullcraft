@@ -230,7 +230,7 @@ export class PullCraft {
           base: baseBranch,
           head: compareBranch
         });
-        await this.openUrl(response.data.html_url.replace(/%0A$/, ''));
+        await this.openUrl(response.data.html_url.trim().replace('\n', ''));
       }
     } catch (error: any) {
       console.error(`Error creating PR: ${error.message}`);
