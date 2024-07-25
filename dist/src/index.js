@@ -280,15 +280,7 @@ class PullCraft {
     getDiff(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const filenames = yield this.git.raw([
-                    'diff',
-                    '--name-only',
-                    baseBranch,
-                    compareBranch,
-                    '--',
-                    '.',
-                    ...this.exclusions
-                ]);
+                const filenames = yield this.getFilenames(baseBranch, compareBranch);
                 const files = filenames.split('\n').filter(Boolean);
                 let totalDiff = '';
                 for (const file of files) {

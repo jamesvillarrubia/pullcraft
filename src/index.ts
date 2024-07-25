@@ -294,15 +294,7 @@ export class PullCraft {
 
   async getDiff (baseBranch: string, compareBranch: string): Promise<string> {
     try {
-      const filenames = await this.git.raw([
-        'diff',
-        '--name-only',
-        baseBranch,
-        compareBranch,
-        '--',
-        '.',
-        ...this.exclusions
-      ]);
+      const filenames = await this.getFilenames(baseBranch, compareBranch);
 
       const files = filenames.split('\n').filter(Boolean);
       let totalDiff = '';
