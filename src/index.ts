@@ -34,6 +34,7 @@ const openaiDefaults = {
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
+const diffThreshold = 1000;
 
 function filterUndefined (obj: Record<string, any>): Record<string, any> {
   return Object.fromEntries(Object.entries(obj || {}).filter(([_, v]) => v !== undefined));
@@ -54,6 +55,7 @@ export class PullCraft {
   commanderOptions: any;
   replacements: any = {};
   standardReplacements: any = {};
+  diffThreshold: number;
 
   constructor (commanderOptions: any) {
     const explorer = cosmiconfigSync(configName, { searchStrategy: 'global' });
@@ -76,7 +78,8 @@ export class PullCraft {
       ),
       githubStrategy: commanderOptions.githubStrategy || configOptions.githubStrategy || githubStrategy,
       githubToken: commanderOptions.githubToken || configOptions.githubToken || process.env.GITHUB_TOKEN,
-      placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern
+      placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern,
+      diffThreshold: commanderOptions.diffThreshold || configOptions.diffThreshold || diffThreshold
     };
     // console.log('mergedOptions',
     //   openaiDefaults,
@@ -92,6 +95,7 @@ export class PullCraft {
     this.githubStrategy = mergedOptions.githubStrategy;
     this.githubToken = mergedOptions.githubToken;
     this.placeholderPattern = mergedOptions.placeholderPattern;
+    this.diffThreshold = mergedOptions.diffThreshold;
 
     // Set the OpenAI API key
     if (!this.openaiConfig.apiKey) {
@@ -270,18 +274,47 @@ export class PullCraft {
     }
   }
 
+  // async getDiff (baseBranch: string, compareBranch: string): Promise<string> {
+  //   try {
+  //     // console.log('EXLCUSIONS DIFF', this.exclusions);
+  //     const outcome = await this.git.raw([
+  //       'diff',
+  //       baseBranch,
+  //       compareBranch,
+  //       '--',
+  //       '.',
+  //       ...this.exclusions
+  //     ]);
+  //     return outcome;
+  //   } catch (error: any) {
+  //     console.error(`Error getting diff: ${error.message}`);
+  //     throw error;
+  //   }
+  // }
+
   async getDiff (baseBranch: string, compareBranch: string): Promise<string> {
     try {
-      // console.log('EXLCUSIONS DIFF', this.exclusions);
-      const outcome = await this.git.raw([
-        'diff',
-        baseBranch,
-        compareBranch,
-        '--',
-        '.',
-        ...this.exclusions
-      ]);
-      return outcome;
+      const filenames = await this.getFilenames(baseBranch, compareBranch);
+
+      const files = filenames.split('\n').filter(Boolean);
+      let totalDiff = '';
+
+      for (const file of files) {
+        const fileDiff = await this.git.raw([
+          'diff',
+          baseBranch,
+          compareBranch,
+          '--',
+          file
+        ]);
+
+        const lineCount = fileDiff.split('\n').length;
+        if (lineCount <= this.diffThreshold) {
+          totalDiff += fileDiff;
+        }
+      }
+
+      return totalDiff;
     } catch (error: any) {
       console.error(`Error getting diff: ${error.message}`);
       throw error;

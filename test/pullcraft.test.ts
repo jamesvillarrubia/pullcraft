@@ -197,18 +197,46 @@ describe('PullCraft', () => {
     it('should get diff between branches', async () => {
       const baseBranch = 'main';
       const compareBranch = 'feature';
+      const filenamesOutput = 'a/file1.txt\nb/file1.txt\n';
       const diffOutput = 'diff --git a/file1.txt b/file1.txt\nindex 83db48f..f735c2d 100644\n--- a/file1.txt\n+++ b/file1.txt\n@@ -1 +1 @@\n-Hello\n+Hello World\n';
-      const gitStub = sinon.stub(pullCraft.git, 'raw').resolves(diffOutput);
 
-      const diff = await pullCraft.getDiff(baseBranch, compareBranch);
-      expect(diff).to.equal(diffOutput);
+      const gitStub = sinon.stub(pullCraft.git, 'raw');
+      gitStub.onCall(0).resolves(filenamesOutput); // First call returns filenames
+      gitStub.onCall(1).resolves(diffOutput); // Second call returns diff output
+      gitStub.onCall(2).resolves(diffOutput); // Second call returns diff output
+
+      const result = await pullCraft.getDiff(baseBranch, compareBranch);
+
+      // Add your assertions here
+      expect(result).to.equal(diffOutput + diffOutput);
+    });
+
+    it('should ignore files over 1000 lines', async () => {
+      const baseBranch = 'main';
+      const compareBranch = 'feature';
+      const filenamesOutput = 'a/file1.txt\nb/file1.txt\n';
+      const diffOutput = 'diff';
+      const longOutput = 'a\n'.repeat(1001);
+
+      const gitStub = sinon.stub(pullCraft.git, 'raw');
+      gitStub.onCall(0).resolves(filenamesOutput); // First call returns filenames
+      gitStub.onCall(1).resolves(diffOutput); // Second call returns diff output
+      gitStub.onCall(2).resolves(longOutput); // Second call returns diff output
+
+      const result = await pullCraft.getDiff(baseBranch, compareBranch);
+
+      // Add your assertions here
+      expect(result).to.equal(diffOutput);
     });
 
     it('should handle errors', async () => {
       const baseBranch = 'main';
       const compareBranch = 'feature';
       const errorMessage = 'Error getting diff';
-      const gitStub = sinon.stub(pullCraft.git, 'raw').rejects(new Error(errorMessage));
+
+      const gitStub = sinon.stub(pullCraft.git, 'raw');
+      gitStub.onCall(0).resolves('file1.txt\nfile2.txt\n'); // First call returns filenames
+      gitStub.onCall(1).rejects(new Error(errorMessage));
       await testErrorHandling(() => pullCraft.getDiff(baseBranch, compareBranch), errorMessage);
     });
   });
@@ -219,7 +247,6 @@ describe('PullCraft', () => {
       const compareBranch = 'feature';
       const filenamesOutput = 'file1.txt\nfile2.txt\n';
       const gitStub = sinon.stub(pullCraft.git, 'raw').resolves(filenamesOutput);
-
       const filenames = await pullCraft.getFilenames(baseBranch, compareBranch);
       expect(filenames).to.equal(filenamesOutput);
     });
