@@ -30,6 +30,7 @@ program
     .option('--n <n>', 'OpenAI N')
     .option('--stop <stop>', 'OpenAI Stop')
     .option('--temp <temperature>', 'OpenAI Temperature')
+    .option('--dumpTo <filename>', 'Dump the diff to a file')
     .parse(process.argv);
 const options = program.opts();
 const baseBranch = program.args[0] || options.baseBranch;
@@ -40,6 +41,7 @@ const nested = {
     openPr: options.openPr,
     githubStrategy: options.githubStrategy,
     diffThreshold: options.diffThreshold,
+    dumpTo: options.dumpTo,
     openai: {
         apiKey: options.apiKey,
         url: options.url,
