@@ -411,8 +411,8 @@ export class PullCraft {
   }
 
   async gptCall (prompt: string) {
-    console.log('System Prompt:', this.openaiConfig.systemPrompt + hintPrompt + this.hint);
-    console.log('Prompt:', prompt);
+    // console.log('System Prompt:', this.openaiConfig.systemPrompt + ((this.hint) ? hintPrompt + this.hint : ''));
+    // console.log('Prompt:', prompt);
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4-turbo',
@@ -421,7 +421,7 @@ export class PullCraft {
         stop: null,
         temperature: 0.2,
         messages: [
-          { role: 'system', content: this.openaiConfig.systemPrompt + (!!this.hint) ? hintPrompt + this.hint : '' },
+          { role: 'system', content: this.openaiConfig.systemPrompt + ((this.hint) ? hintPrompt + this.hint : '') },
           { role: 'user', content: prompt }
         ],
         response_format: { type: 'json_object' }

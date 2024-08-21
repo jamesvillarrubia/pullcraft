@@ -44,6 +44,7 @@ const nested = {
   githubStrategy: options.githubStrategy,
   diffThreshold: options.diffThreshold,
   dumpTo: options.dumpTo,
+  hint: options.hint,
   openai: {
     apiKey: options.apiKey,
     url: options.url,
