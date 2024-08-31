@@ -1,5 +1,5 @@
 import simpleGit from 'simple-git';
-import { prompt, titleTemplate, bodyTemplate } from './prompt';
+import { systemPrompt, titleTemplate, bodyTemplate, hintPrompt } from './prompt';
 import { cosmiconfigSync } from 'cosmiconfig';
 import OpenAI from 'openai';
 import { ChildProcess, execSync, exec } from 'child_process';
@@ -25,7 +25,7 @@ const defaultOpenPr = true;
 const openaiDefaults = {
   url: 'https://api.openai.com/v1/chat/completions',
   model: 'gpt-4o',
-  systemPrompt: prompt,
+  systemPrompt,
   titleTemplate,
   bodyTemplate,
   max_tokens: 3000,
@@ -35,7 +35,7 @@ const openaiDefaults = {
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
-const diffThreshold = 1000;
+const diffThreshold = 400;
 
 function filterUndefined (obj: Record<string, any>): Record<string, any> {
   return Object.fromEntries(Object.entries(obj || {}).filter(([_, v]) => v !== undefined));
@@ -58,6 +58,7 @@ export class PullCraft {
   standardReplacements: any = {};
   diffThreshold: number;
   dumpTo: string;
+  hint: string;
 
   constructor (commanderOptions: any) {
     const explorer = cosmiconfigSync(configName, { searchStrategy: 'global' });
@@ -95,6 +96,7 @@ export class PullCraft {
     this.placeholderPattern = mergedOptions.placeholderPattern;
     this.diffThreshold = mergedOptions.diffThreshold;
     this.dumpTo = mergedOptions.dumpTo;
+    this.hint = commanderOptions.hint;
 
     // Set the OpenAI API key
     if (!this.openaiConfig.apiKey) {
@@ -325,6 +327,7 @@ export class PullCraft {
         if (lineCount <= this.diffThreshold) {
           totalModifiedFiles += fileDiff;
         } else {
+          console.log(`File ${file} is too large to display in the diff. Skipping.`);
           totalModifiedFiles += `\n\n\nFile ${file} is too large to display in the diff. Skipping.\n\n\n`;
         }
       }
@@ -381,9 +384,6 @@ export class PullCraft {
       };
 
       const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-      // this.dump(newFiles, 'newfiles.txt');
-      // this.dump(diff, 'diff.txt');
-      // this.dump(filenames, 'filenames.txt');
 
       const response = await this.gptCall(finalPrompt);
 
@@ -419,7 +419,7 @@ export class PullCraft {
         stop: null,
         temperature: 0.2,
         messages: [
-          { role: 'system', content: this.openaiConfig.systemPrompt },
+          { role: 'system', content: this.openaiConfig.systemPrompt + ((this.hint) ? hintPrompt + this.hint : '') },
           { role: 'user', content: prompt }
         ],
         response_format: { type: 'json_object' }

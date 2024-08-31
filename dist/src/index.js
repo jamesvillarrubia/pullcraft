@@ -39,7 +39,7 @@ const defaultOpenPr = true;
 const openaiDefaults = {
     url: 'https://api.openai.com/v1/chat/completions',
     model: 'gpt-4o',
-    systemPrompt: prompt_1.prompt,
+    systemPrompt: prompt_1.systemPrompt,
     titleTemplate: prompt_1.titleTemplate,
     bodyTemplate: prompt_1.bodyTemplate,
     max_tokens: 3000,
@@ -49,7 +49,7 @@ const openaiDefaults = {
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
-const diffThreshold = 1000;
+const diffThreshold = 400;
 function filterUndefined(obj) {
     return Object.fromEntries(Object.entries(obj || {}).filter(([_, v]) => v !== undefined));
 }
@@ -86,6 +86,7 @@ class PullCraft {
         this.placeholderPattern = mergedOptions.placeholderPattern;
         this.diffThreshold = mergedOptions.diffThreshold;
         this.dumpTo = mergedOptions.dumpTo;
+        this.hint = commanderOptions.hint;
         // Set the OpenAI API key
         if (!this.openaiConfig.apiKey) {
             throw new Error('Error: OPENAI_API_KEY is not set');
@@ -303,6 +304,7 @@ class PullCraft {
                         totalModifiedFiles += fileDiff;
                     }
                     else {
+                        console.log(`File ${file} is too large to display in the diff. Skipping.`);
                         totalModifiedFiles += `\n\n\nFile ${file} is too large to display in the diff. Skipping.\n\n\n`;
                     }
                 }
@@ -353,9 +355,6 @@ class PullCraft {
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
                     compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-                // this.dump(newFiles, 'newfiles.txt');
-                // this.dump(diff, 'diff.txt');
-                // this.dump(filenames, 'filenames.txt');
                 const response = yield this.gptCall(finalPrompt);
                 return { response, exit: false };
             }
@@ -387,7 +386,7 @@ class PullCraft {
                     stop: null,
                     temperature: 0.2,
                     messages: [
-                        { role: 'system', content: this.openaiConfig.systemPrompt },
+                        { role: 'system', content: this.openaiConfig.systemPrompt + ((this.hint) ? prompt_1.hintPrompt + this.hint : '') },
                         { role: 'user', content: prompt }
                     ],
                     response_format: { type: 'json_object' }

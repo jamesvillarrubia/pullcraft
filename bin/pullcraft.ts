@@ -22,6 +22,7 @@ program
   .option('-t, --title-template <title>', 'Title Template')
   .option('-d, --description-template <body>', 'Description Template')
   .option('-f, --diff-threshold <threshold>', 'Max number of changed lines in a file, defaults to 1000')
+  .option('-h, --hint <hint>', 'Hint for the AI about the type of changes')
   .option('--api-key <key>', 'OpenAI API Key')
   .option('--url <url>', 'OpenAI URL')
   .option('--model <model>', 'OpenAI Model')
@@ -43,6 +44,7 @@ const nested = {
   githubStrategy: options.githubStrategy,
   diffThreshold: options.diffThreshold,
   dumpTo: options.dumpTo,
+  hint: options.hint,
   openai: {
     apiKey: options.apiKey,
     url: options.url,
