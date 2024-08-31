@@ -10,7 +10,10 @@ import childProcess from 'child_process';
 delete process.env.OPENAI_API_KEY;
 delete process.env.GITHUB_TOKEN;
 
-async function testErrorHandling (fn: () => Promise<any>, expectedErrorMessage:any) {
+async function testErrorHandling (
+  fn: () => Promise<any>,
+  expectedErrorMessage: any
+) {
   const consoleErrorStub = sinon.stub(console, 'error');
   try {
     await fn();
@@ -34,7 +37,10 @@ describe('PullCraft', () => {
   let execStub: sinon.SinonStub;
 
   beforeEach(() => {
-    pullCraft = new PullCraft({ openai: { apiKey: 'fake-openai-api-key' }, githubToken: 'fake-github-token' });
+    pullCraft = new PullCraft({
+      openai: { apiKey: 'fake-openai-api-key' },
+      githubToken: 'fake-github-token'
+    });
     openaiStub = sinon.stub(pullCraft.openai.chat.completions, 'create');
     // openUrlStub = sinon.stub(pullCraft,'openUrl').resolves({} as ChildProcess);
     createPullStub = sinon.stub(pullCraft.gitHubClient, 'createPull');
@@ -177,67 +183,105 @@ describe('PullCraft', () => {
 
   describe('getNewFiles', () => {
     it('should get new files', async () => {
-      const gitStub = sinon.stub(pullCraft.git, 'raw').resolves('diff --git a/file.txt b/file.txt\n');
+      const gitStub = sinon.stub(pullCraft.git, 'raw');
+
+      // Stub for the first call to get new filenames
+      gitStub.onFirstCall().resolves('file1.txt\nfile2.txt\n');
+
+      // Stubs for subsequent calls to get file diffs
+      gitStub.onSecondCall().resolves('diff --git a/file1.txt b/file1.txt\n...');
+      gitStub.onThirdCall().resolves('diff --git a/file2.txt b/file2.txt\n...');
+
       const result = await pullCraft.getNewFiles('develop', 'feature-branch');
-      expect(gitStub.calledOnceWith(['diff', '--diff-filter=A', 'develop', 'feature-branch', '--', '.', ...pullCraft.exclusions])).to.be.true;
-      expect(result).to.equal('diff --git a/file.txt b/file.txt\n');
+
+      expect(gitStub.getCall(0).args[0]).to.deep.equal(['diff', '--name-only', '--diff-filter=A', 'develop', 'feature-branch']);
+
+      expect(gitStub.getCall(1).args[0]).to.deep.equal(['diff', 'develop', 'feature-branch', '--', 'file1.txt']);
+
+      expect(gitStub.getCall(2).args[0]).to.deep.equal(['diff', 'develop', 'feature-branch', '--', 'file2.txt']);
+
+      expect(result).to.equal(
+        'diff --git a/file1.txt b/file1.txt\n...diff --git a/file2.txt b/file2.txt\n...'
+      );
+    });
+    it('should handle large files', async () => {
+      const gitStub = sinon.stub(pullCraft.git, 'raw');
+
+      gitStub.onFirstCall().resolves('large_file.txt\n');
+
+      // Simulate a large file diff
+      const largeDiff = 'diff\n'.repeat(pullCraft.diffThreshold + 1);
+      gitStub.onSecondCall().resolves(largeDiff);
+
+      const result = await pullCraft.getNewFiles('develop', 'feature-branch');
+
+      expect(result).to.include('File large_file.txt is too large to display in the diff. Skipping.');
     });
 
     it('should handle error when getting new files', async () => {
       const errorMessage = 'Failed to get new files';
       const gitStub = sinon.stub(pullCraft.git, 'raw').rejects(new Error(errorMessage));
-      // const consoleErrorStub = sinon.stub(console, 'error');
 
       await testErrorHandling(() => pullCraft.getNewFiles('develop', 'feature-branch'), errorMessage);
-      expect(gitStub.calledOnceWith(['diff', '--diff-filter=A', 'develop', 'feature-branch', '--', '.', ...pullCraft.exclusions])).to.be.true;
     });
   });
 
-  describe('getDiff', () => {
-    it('should get diff between branches', async () => {
+  describe('getModifiedFiles', () => {
+    it('should get diff for modified files between branches', async () => {
       const baseBranch = 'main';
       const compareBranch = 'feature';
-      const filenamesOutput = 'a/file1.txt\nb/file1.txt\n';
-      const diffOutput = 'diff --git a/file1.txt b/file1.txt\nindex 83db48f..f735c2d 100644\n--- a/file1.txt\n+++ b/file1.txt\n@@ -1 +1 @@\n-Hello\n+Hello World\n';
+      const modifiedFilenamesOutput = 'file1.txt\nfile2.txt\n';
+      const diffOutput1 = 'diff --git a/file1.txt b/file1.txt\nindex 83db48f..f735c2d 100644\n--- a/file1.txt\n+++ b/file1.txt\n@@ -1 +1 @@\n-Hello\n+Hello World\n';
+      const diffOutput2 = 'diff --git a/file2.txt b/file2.txt\nindex 83db48f..f735c2d 100644\n--- a/file2.txt\n+++ b/file2.txt\n@@ -1 +1 @@\n-Goodbye\n+Goodbye World\n';
 
       const gitStub = sinon.stub(pullCraft.git, 'raw');
-      gitStub.onCall(0).resolves(filenamesOutput); // First call returns filenames
-      gitStub.onCall(1).resolves(diffOutput); // Second call returns diff output
-      gitStub.onCall(2).resolves(diffOutput); // Second call returns diff output
+      gitStub.onCall(0).resolves(modifiedFilenamesOutput);
+      gitStub.onCall(1).resolves(diffOutput1);
+      gitStub.onCall(2).resolves(diffOutput2);
 
-      const result = await pullCraft.getDiff(baseBranch, compareBranch);
+      const result = await pullCraft.getModifiedFiles(baseBranch, compareBranch);
 
-      // Add your assertions here
-      expect(result).to.equal(diffOutput + diffOutput);
+      expect(result).to.equal(diffOutput1 + diffOutput2);
+      expect(gitStub.callCount).to.equal(3);
+      expect(gitStub.getCall(0).args[0]).to.deep.equal(['diff', '--name-only', '--diff-filter=M', baseBranch, compareBranch]);
+      expect(gitStub.getCall(1).args[0]).to.deep.equal(['diff', baseBranch, compareBranch, '--', 'file1.txt']);
+      expect(gitStub.getCall(2).args[0]).to.deep.equal(['diff', baseBranch, compareBranch, '--', 'file2.txt']);
     });
 
-    it('should ignore files over 1000 lines', async () => {
+    it('should skip files over diffThreshold lines', async () => {
       const baseBranch = 'main';
       const compareBranch = 'feature';
-      const filenamesOutput = 'a/file1.txt\nb/file1.txt\n';
-      const diffOutput = 'diff';
-      const longOutput = 'a\n'.repeat(1001);
+      const modifiedFilenamesOutput = 'file1.txt\nfile2.txt\n';
+      const shortDiffOutput = 'Short diff';
+      const longDiffOutput = 'a\n'.repeat(pullCraft.diffThreshold + 1);
 
       const gitStub = sinon.stub(pullCraft.git, 'raw');
-      gitStub.onCall(0).resolves(filenamesOutput); // First call returns filenames
-      gitStub.onCall(1).resolves(diffOutput); // Second call returns diff output
-      gitStub.onCall(2).resolves(longOutput); // Second call returns diff output
+      gitStub.onCall(0).resolves(modifiedFilenamesOutput);
+      gitStub.onCall(1).resolves(shortDiffOutput);
+      gitStub.onCall(2).resolves(longDiffOutput);
 
-      const result = await pullCraft.getDiff(baseBranch, compareBranch);
+      let capturedLog = '';
+      const consoleLogStub = sinon.stub(console, 'log').callsFake((message) => {
+        capturedLog = message;
+      });
 
-      // Add your assertions here
-      expect(result).to.equal(diffOutput);
+      const result = await pullCraft.getModifiedFiles(baseBranch, compareBranch);
+
+      expect(result).to.equal(shortDiffOutput + '\n\n\nFile file2.txt is too large to display in the diff. Skipping.\n\n\n');
+      expect(capturedLog).to.equal('File file2.txt is too large to display in the diff. Skipping.');
+
+      consoleLogStub.restore();
     });
 
     it('should handle errors', async () => {
       const baseBranch = 'main';
       const compareBranch = 'feature';
-      const errorMessage = 'Error getting diff';
+      const errorMessage = 'Error getting modified files';
 
       const gitStub = sinon.stub(pullCraft.git, 'raw');
-      gitStub.onCall(0).resolves('file1.txt\nfile2.txt\n'); // First call returns filenames
-      gitStub.onCall(1).rejects(new Error(errorMessage));
-      await testErrorHandling(() => pullCraft.getDiff(baseBranch, compareBranch), errorMessage);
+      gitStub.rejects(new Error(errorMessage));
+
+      await testErrorHandling(() => pullCraft.getModifiedFiles(baseBranch, compareBranch), errorMessage);
     });
   });
 
@@ -279,42 +323,88 @@ describe('PullCraft', () => {
   });
 
   describe('differ', () => {
-    it('should return "No changes found" when there are no differences', async () => {
+    it('should return response with exit true when there are no differences', async () => {
       // Setup stubs to simulate no differences
-
       const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
-      const getDiffStub = sinon.stub(pullCraft, 'getDiff').resolves('');
+      const getDiffStub = sinon.stub(pullCraft, 'getModifiedFiles').resolves('');
       const getNewFilesStub = sinon.stub(pullCraft, 'getNewFiles').resolves('');
       const getFilenamesStub = sinon.stub(pullCraft, 'getFilenames').resolves('');
-      const gptCallStub = sinon.stub(pullCraft, 'gptCall').resolves('GPT response');
 
       const result = await pullCraft.differ('develop', 'feature-branch');
-      expect(result).to.equal('No changes found between the specified branches.');
+      expect(result).to.deep.equal({
+        response: 'No changes found between the specified branches.',
+        exit: true
+      });
     });
 
     it('should return GPT response when there are changes', async () => {
       // Setup stubs to simulate differences
       const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
-      const getDiffStub = sinon.stub(pullCraft, 'getDiff').resolves('some diff');
+      const getDiffStub = sinon.stub(pullCraft, 'getModifiedFiles').resolves('some diff');
       const getNewFilesStub = sinon.stub(pullCraft, 'getNewFiles').resolves('newFile.js');
       const getFilenamesStub = sinon.stub(pullCraft, 'getFilenames').resolves('file1.js\nfile2.js');
+      const buildTextPromptStub = sinon.stub(pullCraft, 'buildTextPrompt').returns('prompt');
       const gptCallStub = sinon.stub(pullCraft, 'gptCall').resolves('GPT response');
 
       const result = await pullCraft.differ('develop', 'feature-branch');
-      expect(result).to.equal('GPT response');
+      expect(result).to.deep.equal({
+        response: 'GPT response',
+        exit: false
+      });
+    });
+
+    it('should handle dumpTo option', async () => {
+      // Setup stubs and temporary dumpTo option
+      const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
+      const getDiffStub = sinon.stub(pullCraft, 'getModifiedFiles').resolves('some diff');
+      const getNewFilesStub = sinon.stub(pullCraft, 'getNewFiles').resolves('newFile.js');
+      const getFilenamesStub = sinon.stub(pullCraft, 'getFilenames').resolves('file1.js\nfile2.js');
+      const dumpStub = sinon.stub(pullCraft, 'dump');
+
+      pullCraft.dumpTo = 'test-dump.txt';
+
+      const result = await pullCraft.differ('develop', 'feature-branch');
+      expect(result).to.deep.equal({
+        response: 'Diff dumped to test-dump.txt',
+        exit: true
+      });
+      expect(dumpStub.calledOnce).to.be.true;
+
+      // Reset dumpTo option
+      pullCraft.dumpTo = '';
     });
 
     it('should handle errors and log them', async () => {
       // Setup stubs to throw an error
       const consoleErrorStub = sinon.stub(console, 'error');
-      const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
-      gitStub.throws(new Error('revparse error'));
+      const gitStub = sinon.stub(pullCraft.git, 'revparse').throws(new Error('revparse error'));
 
       const result = await pullCraft.differ('develop');
       expect(result).to.be.undefined;
       expect(consoleErrorStub.calledWith('Error generating PR body: revparse error')).to.be.true;
 
       consoleErrorStub.restore();
+    });
+
+    it('should include hint in GPT response when provided', async () => {
+      const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
+      const getDiffStub = sinon.stub(pullCraft, 'getModifiedFiles').resolves('some diff');
+      const getNewFilesStub = sinon.stub(pullCraft, 'getNewFiles').resolves('newFile.js');
+      const getFilenamesStub = sinon.stub(pullCraft, 'getFilenames').resolves('file1.js\nfile2.js');
+      const buildTextPromptStub = sinon.stub(pullCraft, 'buildTextPrompt').returns('prompt with hint');
+      const gptCallStub = sinon.stub(pullCraft, 'gptCall').resolves('GPT response with hint');
+
+      pullCraft.hint = 'This is a hint';
+
+      const result = await pullCraft.differ('develop', 'feature-branch');
+      expect(result).to.deep.equal({
+        response: 'GPT response with hint',
+        exit: false
+      });
+      expect(buildTextPromptStub.calledWith(sinon.match.any)).to.be.true;
+
+      // Reset hint
+      pullCraft.hint = '';
     });
   });
 
@@ -323,7 +413,7 @@ describe('PullCraft', () => {
       sinon.stub(console, 'log');
       const content = JSON.stringify({ body: 'PR body', title: 'PR title' });
       const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
-      const differStub = sinon.stub(pullCraft, 'differ').resolves(content);
+      const differStub = sinon.stub(pullCraft, 'differ').resolves({ response: content, exit: false });
       const getRepoInfoStub = sinon.stub(pullCraft, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
       listPullsStub.resolves([]);
       createPullStub.resolves({ data: { html_url: 'http://example.com' } });
@@ -332,7 +422,7 @@ describe('PullCraft', () => {
       await pullCraft.createPr('develop');
 
       expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.be.true;
-      // expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
+      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
       expect(getRepoInfoStub.calledOnce).to.be.true;
       expect(listPullsStub.calledOnceWith({ owner: 'owner', repo: 'repo', head: 'feature-branch', base: 'develop' })).to.be.true;
       expect(createPullStub.calledOnceWith({
@@ -343,22 +433,48 @@ describe('PullCraft', () => {
         base: 'develop',
         head: 'feature-branch'
       })).to.be.true;
-      // console.log(openUrlStub.args);
       expect(openUrlStub.calledOnceWith('http://example.com')).to.be.true;
     });
 
     it('should handle error when creating or updating a pull request', async () => {
       const consoleErrorStub = sinon.stub(console, 'error');
       const gitStub = sinon.stub(pullCraft.git, 'revparse').rejects(new Error('Failed to get current branch'));
-      const differStub = sinon.stub(pullCraft, 'differ').resolves('PR body');
+      const differStub = sinon.stub(pullCraft, 'differ').resolves({ response: 'PR body', exit: false });
       const getRepoInfoStub = sinon.stub(pullCraft, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
       listPullsStub.resolves([]);
       createPullStub.resolves({ url: 'http://example.com' });
-      // const openUrlStub = sinon.stub(pullCraft, 'openUrl').resolves();
 
       await pullCraft.createPr('develop');
 
       expect(consoleErrorStub.calledOnceWith('Error creating PR: Failed to get current branch')).to.be.true;
+    });
+
+    it('should include hint in PR creation when provided', async () => {
+      sinon.stub(console, 'log');
+      const content = JSON.stringify({ body: 'PR body with hint', title: 'PR title' });
+      const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
+      const differStub = sinon.stub(pullCraft, 'differ').resolves({ response: content, exit: false });
+      const getRepoInfoStub = sinon.stub(pullCraft, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
+      listPullsStub.resolves([]);
+      createPullStub.resolves({ data: { html_url: 'http://example.com' } });
+      const openUrlStub = sinon.stub(pullCraft, 'openUrl').resolves();
+
+      pullCraft.hint = 'This is a PR hint';
+
+      await pullCraft.createPr('develop');
+
+      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
+      expect(createPullStub.calledOnceWith({
+        owner: 'owner',
+        repo: 'repo',
+        title: 'PR title',
+        body: 'PR body with hint',
+        base: 'develop',
+        head: 'feature-branch'
+      })).to.be.true;
+
+      // Reset hint
+      pullCraft.hint = '';
     });
   });
 });

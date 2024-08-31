@@ -411,8 +411,6 @@ export class PullCraft {
   }
 
   async gptCall (prompt: string) {
-    // console.log('System Prompt:', this.openaiConfig.systemPrompt + ((this.hint) ? hintPrompt + this.hint : ''));
-    // console.log('Prompt:', prompt);
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4-turbo',
