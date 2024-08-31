@@ -19,6 +19,7 @@ const cosmiconfig_1 = require("cosmiconfig");
 const openai_1 = __importDefault(require("openai"));
 const child_process_1 = require("child_process");
 const githubClient_1 = require("./githubClient");
+const fs_1 = __importDefault(require("fs"));
 const configName = 'pullcraft';
 const defaultExclusions = [
     '***package-lock.json',
@@ -37,8 +38,8 @@ const githubStrategy = 'gh';
 const defaultOpenPr = true;
 const openaiDefaults = {
     url: 'https://api.openai.com/v1/chat/completions',
-    model: 'gpt-3.5-turbo-instruct',
-    systemPrompt: prompt_1.prompt,
+    model: 'gpt-4o',
+    systemPrompt: prompt_1.systemPrompt,
     titleTemplate: prompt_1.titleTemplate,
     bodyTemplate: prompt_1.bodyTemplate,
     max_tokens: 3000,
@@ -48,7 +49,7 @@ const openaiDefaults = {
 };
 const baseDefault = 'develop';
 const placeholderPattern = '__KEY__';
-const diffThreshold = 1000;
+const diffThreshold = 400;
 function filterUndefined(obj) {
     return Object.fromEntries(Object.entries(obj || {}).filter(([_, v]) => v !== undefined));
 }
@@ -72,13 +73,9 @@ class PullCraft {
             githubStrategy: commanderOptions.githubStrategy || configOptions.githubStrategy || githubStrategy,
             githubToken: commanderOptions.githubToken || configOptions.githubToken || process.env.GITHUB_TOKEN,
             placeholderPattern: commanderOptions.placeholderPattern || configOptions.placeholderPattern || placeholderPattern,
-            diffThreshold: commanderOptions.diffThreshold || configOptions.diffThreshold || diffThreshold
+            diffThreshold: commanderOptions.diffThreshold || configOptions.diffThreshold || diffThreshold,
+            dumpTo: commanderOptions.dumpTo || configOptions.dumpTo || null
         };
-        // console.log('mergedOptions',
-        //   openaiDefaults,
-        //   configOptions.openai,
-        //   commanderOptions.openai,
-        //   mergedOptions);
         // Assign merged options to instance variables
         this.openPr = mergedOptions.openPr;
         this.exclusions = mergedOptions.exclusions;
@@ -88,6 +85,8 @@ class PullCraft {
         this.githubToken = mergedOptions.githubToken;
         this.placeholderPattern = mergedOptions.placeholderPattern;
         this.diffThreshold = mergedOptions.diffThreshold;
+        this.dumpTo = mergedOptions.dumpTo;
+        this.hint = commanderOptions.hint;
         // Set the OpenAI API key
         if (!this.openaiConfig.apiKey) {
             throw new Error('Error: OPENAI_API_KEY is not set');
@@ -169,7 +168,10 @@ class PullCraft {
                 const { owner, repo } = repoInfo;
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { owner,
                     repo });
-                let response = yield this.differ(baseBranch, compareBranch);
+                let { response, exit = false } = yield this.differ(baseBranch, compareBranch);
+                if (exit) {
+                    return;
+                }
                 // console.log('creatPr->differ->response', response);
                 if (!response) {
                     console.error('Error: Response could not be retrieved.');
@@ -242,48 +244,17 @@ class PullCraft {
     getNewFiles(baseBranch, compareBranch) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // console.log('EXLCUSIONS NEW FILES', this.exclusions);
-                const outcome = yield this.git.raw([
+                // Fetch only new files
+                const newFilenames = yield this.git.raw([
                     'diff',
-                    '--diff-filter=A',
+                    '--name-only',
+                    '--diff-filter=A', // Filter for added files
                     baseBranch,
-                    compareBranch,
-                    '--',
-                    '.',
-                    ...this.exclusions
+                    compareBranch
                 ]);
-                return outcome;
-            }
-            catch (error) {
-                console.error(`Error getting new files: ${error.message}`);
-                throw error;
-            }
-        });
-    }
-    // async getDiff (baseBranch: string, compareBranch: string): Promise<string> {
-    //   try {
-    //     // console.log('EXLCUSIONS DIFF', this.exclusions);
-    //     const outcome = await this.git.raw([
-    //       'diff',
-    //       baseBranch,
-    //       compareBranch,
-    //       '--',
-    //       '.',
-    //       ...this.exclusions
-    //     ]);
-    //     return outcome;
-    //   } catch (error: any) {
-    //     console.error(`Error getting diff: ${error.message}`);
-    //     throw error;
-    //   }
-    // }
-    getDiff(baseBranch, compareBranch) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const filenames = yield this.getFilenames(baseBranch, compareBranch);
-                const files = filenames.split('\n').filter(Boolean);
-                let totalDiff = '';
-                for (const file of files) {
+                const newFiles = newFilenames.split('\n').filter(Boolean);
+                let totalNewFiles = '';
+                for (const file of newFiles) {
                     const fileDiff = yield this.git.raw([
                         'diff',
                         baseBranch,
@@ -293,13 +264,54 @@ class PullCraft {
                     ]);
                     const lineCount = fileDiff.split('\n').length;
                     if (lineCount <= this.diffThreshold) {
-                        totalDiff += fileDiff;
+                        totalNewFiles += fileDiff;
+                    }
+                    else {
+                        totalNewFiles += `\n\n\nFile ${file} is too large to display in the diff. Skipping.\n\n\n`;
                     }
                 }
-                return totalDiff;
+                return totalNewFiles;
             }
             catch (error) {
-                console.error(`Error getting diff: ${error.message}`);
+                console.error(`Error getting new files: ${error.message}`);
+                throw error;
+            }
+        });
+    }
+    getModifiedFiles(baseBranch, compareBranch) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Fetch only modified files
+                const modifiedFilenames = yield this.git.raw([
+                    'diff',
+                    '--name-only',
+                    '--diff-filter=M', // Filter for modified files
+                    baseBranch,
+                    compareBranch
+                ]);
+                const modifiedFiles = modifiedFilenames.split('\n').filter(Boolean);
+                let totalModifiedFiles = '';
+                for (const file of modifiedFiles) {
+                    const fileDiff = yield this.git.raw([
+                        'diff',
+                        baseBranch,
+                        compareBranch,
+                        '--',
+                        file
+                    ]);
+                    const lineCount = fileDiff.split('\n').length;
+                    if (lineCount <= this.diffThreshold) {
+                        totalModifiedFiles += fileDiff;
+                    }
+                    else {
+                        console.log(`File ${file} is too large to display in the diff. Skipping.`);
+                        totalModifiedFiles += `\n\n\nFile ${file} is too large to display in the diff. Skipping.\n\n\n`;
+                    }
+                }
+                return totalModifiedFiles;
+            }
+            catch (error) {
+                console.error(`Error getting modified files: ${error.message}`);
                 throw error;
             }
         });
@@ -322,22 +334,29 @@ class PullCraft {
             }
         });
     }
+    dump(diff, location = 'diffdump.txt') {
+        location = this.dumpTo || location;
+        fs_1.default.writeFileSync(location, diff);
+    }
     differ() {
         return __awaiter(this, arguments, void 0, function* (baseBranch = 'develop', compareBranch) {
             try {
                 compareBranch = compareBranch || (yield this.git.revparse(['--abbrev-ref', 'HEAD'])).trim();
-                const diff = yield this.getDiff(baseBranch, compareBranch);
+                const diff = yield this.getModifiedFiles(baseBranch, compareBranch);
                 const newFiles = yield this.getNewFiles(baseBranch, compareBranch);
                 const filenames = yield this.getFilenames(baseBranch, compareBranch);
                 if (!diff && !newFiles) {
-                    return 'No changes found between the specified branches.';
+                    return { response: 'No changes found between the specified branches.', exit: true };
+                }
+                if (this.dumpTo) {
+                    this.dump(diff);
+                    return { response: `Diff dumped to ${this.dumpTo}`, exit: true };
                 }
                 this.standardReplacements = Object.assign(Object.assign({}, this.standardReplacements), { baseBranch,
                     compareBranch });
                 const finalPrompt = this.buildTextPrompt({ diff, newFiles, filenames });
-                // console.log('finalPrompt', finalPrompt);
                 const response = yield this.gptCall(finalPrompt);
-                return response;
+                return { response, exit: false };
             }
             catch (error) {
                 console.error(`Error generating PR body: ${error.message}`);
@@ -351,21 +370,16 @@ class PullCraft {
         // console.log(this.openaiConfig.titleTemplate, this.openaiConfig.bodyTemplate);
         const title = replace(this.openaiConfig.titleTemplate);
         const body = replace(this.openaiConfig.bodyTemplate);
-        return `
-        json TEMPLATE:\n{\n
-            "title": ${title},\n
-            "body": ${body},\n
-        }\n
-        \n--------\n
-        DIFF:\n${diff}
-        \n--------\n
-        NEW_FILES:\n${newFiles}
-        \n--------\n
-        FILENAMES:\n${filenames}`;
+        return `json TEMPLATE:\n{\n"title": ${title},\n"body": ${body}\n}\n
+        \n--------\nDIFF:     \n\`\`\`diff\n${diff}    \`\`\`\n
+        \n--------\nNEW_FILES:\n\`\`\`diff\n${newFiles}\`\`\`\n
+        \n--------\nFILENAMES:\n${filenames}`;
     }
     gptCall(prompt) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
+            // console.log('System Prompt:', this.openaiConfig.systemPrompt + ((this.hint) ? hintPrompt + this.hint : ''));
+            // console.log('Prompt:', prompt);
             try {
                 const response = yield this.openai.chat.completions.create({
                     model: 'gpt-4-turbo',
@@ -374,7 +388,7 @@ class PullCraft {
                     stop: null,
                     temperature: 0.2,
                     messages: [
-                        { role: 'system', content: this.openaiConfig.systemPrompt },
+                        { role: 'system', content: this.openaiConfig.systemPrompt + ((this.hint) ? prompt_1.hintPrompt + this.hint : '') },
                         { role: 'user', content: prompt }
                     ],
                     response_format: { type: 'json_object' }
