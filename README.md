@@ -1,8 +1,8 @@
 # PullCraft
 
-[![NPM](https://img.shields.io/npm/l/pullcraft)](https://github.com/yourusername/pullcraft/blob/main/LICENSE)
+[![NPM](https://img.shields.io/npm/l/pullcraft)](https://github.com/jamesvillarrubia/pullcraft/blob/main/LICENSE)
 [![npm](https://img.shields.io/npm/v/pullcraft?label=latest)](https://www.npmjs.com/package/pullcraft)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/yourusername/pullcraft/npm-publish.yml?branch=main)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jamesvillarrubia/pullcraft/publish.yml?branch=main)
 [![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/NPM/pullcraft)]()
 
 PullCraft is a powerful CLI tool and library for automating the creation and management of GitHub pull requests. It uses AI to generate meaningful PR titles and descriptions based on your code changes.
