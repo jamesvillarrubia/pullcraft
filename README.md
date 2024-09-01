@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/jamesvillarrubia/pullcraft/publish.yml?branch=main)](https://github.com/jamesvillarrubia/pullcraft/actions)
 [![codecov](https://codecov.io/gh/jamesvillarrubia/pullcraft/branch/main/graph/badge.svg?token=USGF77YW25)](https://codecov.io/gh/jamesvillarrubia/pullcraft)
 [![NPM downloads](https://img.shields.io/npm/dm/pullcraft.svg)](https://www.npmjs.com/package/pullcraft)
-[![dependencies Status](https://status.david-dm.org/gh/jamesvillarrubia/pullcraft.svg)](https://david-dm.org/jamesvillarrubia/pullcraft)
+[![Dependency Status](https://img.shields.io/librariesio/release/NPM/pullcraft)]()
 [![Node.js Version](https://img.shields.io/node/v/pullcraft.svg)](https://nodejs.org/en/)
 
 PullCraft is a powerful CLI tool and library for automating the creation and management of GitHub pull requests. It uses AI to generate meaningful PR titles and descriptions based on your code changes.
