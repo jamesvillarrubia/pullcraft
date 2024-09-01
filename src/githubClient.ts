@@ -40,23 +40,37 @@ function escapeShellArg (arg: string): string {
   return arg.replace(/`/g, '\\`');
 }
 
-export class GhClient extends GitHubClient {
-  static createPull: any;
-  async listPulls ({ owner, repo, base, head }: { owner: string, repo: string, base: string, head: string }): Promise<any> {
-    const result = execSync(`gh pr list --repo ${owner}/${repo} --base ${base} --head ${head} --json number`).toString();
-    return JSON.parse(result);
+export class GhClient implements GitHubClient {
+  private escapeShellArg (arg: string): string {
+    // Escape backticks first
+    arg = arg.replace(/`/g, '\\`');
+    // Then escape single quotes
+    // eslint-disable-next-line quotes
+    return `'${arg.replace(/'/g, "'\\''")}'`;
   }
 
-  async updatePull ({ owner, repo, pullNumber, title, body }: { owner: string, repo: string, pullNumber: number, title: string, body: string }) {
-    const escapedTitle = escapeShellArg(title);
-    const escapedBody = escapeShellArg(body);
-    execSync(`gh pr edit ${pullNumber} --repo ${owner}/${repo} --title "${escapedTitle}" --body "${escapedBody}"`);
+  async listPulls (params: { owner: string; repo: string; base?: string; head?: string }): Promise<any[]> {
+    const { owner, repo, base, head } = params;
+    let command = `gh pr list --json number,title,headRefName -R ${owner}/${repo}`;
+    if (base) command += ` --base ${this.escapeShellArg(base)}`;
+    if (head) command += ` --head ${this.escapeShellArg(head)}`;
+    const output = execSync(command).toString();
+    return JSON.parse(output);
   }
 
-  async createPull ({ owner, repo, base, head, title, body }: { owner: string, repo: string, base: string, head: string, title: string, body: string }): Promise<any> {
-    const escapedTitle = escapeShellArg(title);
-    const escapedBody = escapeShellArg(body);
-    const result = execSync(`gh pr create --repo ${owner}/${repo} --base ${base} --head ${head} --title "${escapedTitle}" --body "${escapedBody}"`).toString();
-    return { data: { html_url: result } };
+  async updatePull (params: { owner: string; repo: string; pullNumber: number; title?: string; body?: string }): Promise<void> {
+    const { owner, repo, pullNumber, title, body } = params;
+    let command = `gh pr edit ${pullNumber} -R ${owner}/${repo}`;
+    if (title) command += ` --title ${this.escapeShellArg(title)}`;
+    if (body) command += ` --body ${this.escapeShellArg(body)}`;
+    execSync(command);
+  }
+
+  async createPull (params: { owner: string; repo: string; base: string; head: string; title: string; body?: string }): Promise<{ data: { html_url: string } }> {
+    const { owner, repo, base, head, title, body } = params;
+    let command = `gh pr create -R ${owner}/${repo} --base ${this.escapeShellArg(base)} --head ${this.escapeShellArg(head)} --title ${this.escapeShellArg(title)}`;
+    if (body) command += ` --body ${this.escapeShellArg(body)}`;
+    const output = execSync(command).toString().trim();
+    return { data: { html_url: output } };
   }
 }
