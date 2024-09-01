@@ -176,30 +176,83 @@ PullCraft will look for the OpenAI API key in the following order:
 
 Always ensure your API key is kept secure and not exposed in public repositories.
 
-## API Reference
+## Configuration Options and CLI Flags
 
-### `PullCraft(options)`
+PullCraft can be configured through a `.pullcraftrc` file, environment variables, or command-line arguments. The following table lists all available options, their types, default values, CLI flags, and descriptions:
 
-Creates a new PullCraft instance.
+| Option | Type | Default | CLI Flag | Alias | Description |
+|--------|------|---------|----------|-------|-------------|
+| `baseDefault` | string | `'main'` | `--base-branch <branch>` | `-b` | Default base branch for PR creation |
+| `compareBranch` | string | - | `--compare-branch <branch>` | `-c` | Specify the compare branch |
+| `openPr` | boolean | `false` | `--open-pr` | `-o` | Automatically open PR in browser after creation |
+| `exclusions` | string[] | `[]` | `--exclusions <patterns>` | `-e` | File exclusion patterns (comma-separated) |
+| `githubStrategy` | string | `'gh'` | `--github-strategy <strategy>` | `-g` | GitHub authentication strategy ('gh' or 'octokit') |
+| `githubToken` | string | - | `--github-token <token>` | | GitHub token (required for 'octokit' strategy) |
+| `placeholderPattern` | string | `'__KEY__'` | `--placeholder-pattern <pattern>` | `-p` | Pattern for placeholders in templates |
+| `diffThreshold` | number | `400` | `--diff-threshold <number>` | `-d` | Maximum number of lines for diff display |
+| `titleTemplate` | string | `'__title__'` | `--title-template <template>` | `-t` | Template for PR title |
+| `descriptionTemplate` | string | `'__description__'` | `--description-template <template>` | `-d` | Template for PR description |
+| `hint` | string | - | `--hint <text>` | `-h` | Hint for the AI about the type of changes |
+| `dumpTo` | string | - | `--dump-to <filename>` | | Filename to dump the diff for manual review |
+| `openaiConfig.apiKey` | string | - | `--api-key <key>` | | OpenAI API Key |
+| `openaiConfig.url` | string | OpenAI's default | `--url <url>` | | Custom URL for OpenAI API |
+| `openaiConfig.model` | string | `'gpt-3.5-turbo'` | `--model <model>` | `-m` | OpenAI model to use |
+| `openaiConfig.maxTokens` | number | `500` | `--max-tokens <number>` | | Maximum number of tokens in the OpenAI response |
+| `openaiConfig.n` | number | `1` | `--n <number>` | | Number of completions to generate for OpenAI |
+| `openaiConfig.stop` | string | - | `--stop <sequence>` | | Stop sequence for OpenAI API |
+| `openaiConfig.temperature` | number | `0.7` | `--temp <number>` | | Sampling temperature for OpenAI API |
 
-#### Options:
+Additional CLI-only flags:
+- `--help`: Display help information
+- `--version` (`-v`): Display version information
+Example usage:
 
-- `openPr`: Boolean to automatically open PR in browser
-- `exclusions`: Array of file patterns to exclude
-- `baseDefault`: Default base branch
-- `openaiConfig`: OpenAI API configuration
-- `githubStrategy`: GitHub authentication strategy ('gh' or 'octokit')
-- `githubToken`: GitHub token (required for 'octokit' strategy)
-- `placeholderPattern`: Pattern for placeholders in templates
-- `diffThreshold`: Maximum number of lines for diff display
+```bash
+pullcraft main feature-branch --open-pr -e ".md,package-lock.json" -d 600 -m gpt-4 --temp 0.8 --hint "Refactoring authentication system"
 
-### `createPr(baseBranch, compareBranch)`
+```
+This table provides a comprehensive list of all CLI options and flags, including their aliases (where applicable) and descriptions. It gives users a quick reference for all available command-line arguments they can use with PullCraft.
 
-Creates or updates a pull request.
 
-### `differ(baseBranch, compareBranch)`
 
-Generates a diff between two branches and returns AI-generated PR content.
+## Template Placeholders
+
+PullCraft uses a placeholder system in its title and body templates to dynamically insert information. The default placeholder pattern is `__KEY__`, where `KEY` is replaced with the actual placeholder name.
+
+### Available Placeholders
+
+- `__owner__`: The owner of the repository
+- `__repo__`: The name of the repository
+- `__baseBranch__`: The base branch of the pull request
+- `__compareBranch__`: The compare branch of the pull request
+
+### Using Placeholders in Templates
+
+You can use these placeholders in your title and body templates. For example:
+
+```bash
+pullcraft main --title-template "feat: __baseBranch__ -> __compareBranch__: __title__" --body-template "## Changes\n\n__description__"
+```
+
+In this example:
+- `__repo__` will be replaced with the actual repository name
+- `__KEY_FEATURE__` and `__DESCRIPTION__` are custom placeholders that will be filled by the AI
+- `__compareBranch__` and `__baseBranch__` will be replaced with the actual branch names
+
+### Custom Placeholders
+
+You can also define custom placeholders in your configuration or command line options. These will be available for use in your templates and will be filled by the AI-generated content.
+
+### Changing the Placeholder Pattern
+
+If you prefer a different placeholder pattern, you can change it using the `--placeholder-pattern` option:
+
+```bash
+bash
+pullcraft main --placeholder-pattern "{{KEY}}" --title-template "feat({{repo}}): {{KEY_FEATURE}}"
+```
+
+This will use `{{KEY}}` as the placeholder pattern instead of `__KEY__`. This flexibility allows you to customize the templates to fit your project's conventions and needs.
 
 ## Troubleshooting
 
