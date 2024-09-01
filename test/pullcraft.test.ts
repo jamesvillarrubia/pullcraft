@@ -2,6 +2,8 @@
 import { expect } from 'chai';
 import * as nock from 'nock';
 import * as sinon from 'sinon';
+import { describe, it } from 'mocha';
+
 // import simpleGit from 'simple-git';
 import PullCraft from '../src/index';
 // import proxyquire from 'proxyquire';
