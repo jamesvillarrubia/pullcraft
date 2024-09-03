@@ -2,4 +2,4 @@
 .git
 /dist
 .nyc_output
-
+/coverage
