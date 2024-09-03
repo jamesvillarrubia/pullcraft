@@ -1,4 +1,7 @@
+<img src="./public/logo.png" alt="PullCraft Logo" width="auto">
+
 # PullCraft
+
 
 [![npm version](https://badge.fury.io/js/pullcraft.svg)](https://badge.fury.io/js/pullcraft)
 [![License](https://img.shields.io/npm/l/pullcraft.svg)](https://github.com/jamesvillarrubia/pullcraft/blob/main/LICENSE)
