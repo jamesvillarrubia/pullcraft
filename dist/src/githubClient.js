@@ -52,29 +52,41 @@ class OctokitClient extends GitHubClient {
     }
 }
 exports.OctokitClient = OctokitClient;
-function escapeShellArg(arg) {
-    return arg.replace(/`/g, '\\`');
-}
-class GhClient extends GitHubClient {
-    listPulls(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head }) {
-            const result = (0, child_process_1.execSync)(`gh pr list --repo ${owner}/${repo} --base ${base} --head ${head} --json number`).toString();
-            return JSON.parse(result);
+class GhClient {
+    escapeShellArg(arg) {
+        // Escape backticks first
+        arg = arg.replace(/`/g, '\\`');
+        // Then escape single quotes
+        // eslint-disable-next-line quotes
+        return `'${arg.replace(/'/g, "'\\''")}'`;
+    }
+    listPulls(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo, base, head } = params;
+            const command = `gh pr list --json number,title,headRefName -R ${owner}/${repo} --base '${base}' --head '${head}'`;
+            const output = (0, child_process_1.execSync)(command).toString().trim();
+            return output ? JSON.parse(output) : [];
         });
     }
-    updatePull(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ owner, repo, pullNumber, title, body }) {
-            const escapedTitle = escapeShellArg(title);
-            const escapedBody = escapeShellArg(body);
-            (0, child_process_1.execSync)(`gh pr edit ${pullNumber} --repo ${owner}/${repo} --title "${escapedTitle}" --body "${escapedBody}"`);
+    updatePull(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo, pullNumber, title, body } = params;
+            let command = `gh pr edit ${pullNumber} -R ${owner}/${repo}`;
+            if (title)
+                command += ` --title ${this.escapeShellArg(title)}`;
+            if (body)
+                command += ` --body ${this.escapeShellArg(body)}`;
+            (0, child_process_1.execSync)(command);
         });
     }
-    createPull(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head, title, body }) {
-            const escapedTitle = escapeShellArg(title);
-            const escapedBody = escapeShellArg(body);
-            const result = (0, child_process_1.execSync)(`gh pr create --repo ${owner}/${repo} --base ${base} --head ${head} --title "${escapedTitle}" --body "${escapedBody}"`).toString();
-            return { data: { html_url: result } };
+    createPull(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo, base, head, title, body } = params;
+            let command = `gh pr create -R ${owner}/${repo} --base ${this.escapeShellArg(base)} --head ${this.escapeShellArg(head)} --title ${this.escapeShellArg(title)}`;
+            if (body)
+                command += ` --body ${this.escapeShellArg(body)}`;
+            const output = (0, child_process_1.execSync)(command).toString().trim();
+            return { data: { html_url: output } };
         });
     }
 }

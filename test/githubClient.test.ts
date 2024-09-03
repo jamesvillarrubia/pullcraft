@@ -146,5 +146,131 @@ describe('GitHubClient', () => {
       expect(callArg).to.include('\'Test\\`with\\`backticks\'');
       expect(callArg).to.include('\'Test\\`body\'');
     });
+
+    it('should handle errors from gh cli', async () => {
+      execSyncStub.throws(new Error('CLI Error'));
+
+      try {
+        await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+        expect.fail('Expected method to throw');
+      } catch (error) {
+        expect(error).to.be.an('error');
+        if (error instanceof Error) {
+          expect(error.message).to.equal('CLI Error');
+        } else {
+          expect.fail('Unexpected error type');
+        }
+      }
+
+      try {
+        await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
+        expect.fail('Expected method to throw');
+      } catch (error) {
+        expect(error).to.be.an('error');
+        if (error instanceof Error) {
+          expect(error.message).to.equal('CLI Error');
+        } else {
+          expect.fail('Unexpected error type');
+        }
+      }
+
+      try {
+        await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
+        expect.fail('Expected method to throw');
+      } catch (error) {
+        expect(error).to.be.an('error');
+        if (error instanceof Error) {
+          expect(error.message).to.equal('CLI Error');
+        } else {
+          expect.fail('Unexpected error type');
+        }
+      }
+    });
+
+    it('should handle empty output from gh cli', async () => {
+      execSyncStub.returns(Buffer.from(''));
+
+      const listResult = await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+      expect(listResult).to.deep.equal([]);
+
+      await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
+      // No assertion needed for updatePull as it doesn't return anything
+
+      const createResult = await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
+      expect(createResult).to.deep.equal({ data: { html_url: '' } });
+    });
+
+    it('should handle invalid JSON output from gh cli for listPulls', async () => {
+      execSyncStub.returns(Buffer.from('Invalid JSON'));
+
+      try {
+        await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+        expect.fail('Expected method to throw');
+      } catch (error) {
+        expect(error).to.be.an('error');
+        if (error instanceof Error) {
+          expect(error.message).to.include('Unexpected token');
+        } else {
+          expect.fail('Unexpected error type');
+        }
+      }
+    });
+
+    it('should include title and body in updatePull command when provided', async () => {
+      execSyncStub.returns(Buffer.from(''));
+      await client.updatePull({
+        owner: 'test',
+        repo: 'test',
+        pullNumber: 1,
+        title: 'New Title',
+        body: 'New Body'
+      });
+      expect(execSyncStub.calledOnce).to.be.true;
+      const callArg = execSyncStub.firstCall.args[0] as string;
+      expect(callArg).to.include('--title \'New Title\'');
+      expect(callArg).to.include('--body \'New Body\'');
+    });
+
+    it('should not include title and body in updatePull command when not provided', async () => {
+      execSyncStub.returns(Buffer.from(''));
+      await client.updatePull({
+        owner: 'test',
+        repo: 'test',
+        pullNumber: 1
+      });
+      expect(execSyncStub.calledOnce).to.be.true;
+      const callArg = execSyncStub.firstCall.args[0] as string;
+      expect(callArg).to.not.include('--title');
+      expect(callArg).to.not.include('--body');
+    });
+
+    it('should include body in createPull command when provided', async () => {
+      execSyncStub.returns(Buffer.from('https://github.com/test/test/pull/1'));
+      await client.createPull({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature',
+        title: 'Test',
+        body: 'Test Body'
+      });
+      expect(execSyncStub.calledOnce).to.be.true;
+      const callArg = execSyncStub.firstCall.args[0] as string;
+      expect(callArg).to.include('--body \'Test Body\'');
+    });
+
+    it('should not include body in createPull command when not provided', async () => {
+      execSyncStub.returns(Buffer.from('https://github.com/test/test/pull/1'));
+      await client.createPull({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature',
+        title: 'Test'
+      });
+      expect(execSyncStub.calledOnce).to.be.true;
+      const callArg = execSyncStub.firstCall.args[0] as string;
+      expect(callArg).to.not.include('--body');
+    });
   });
 });

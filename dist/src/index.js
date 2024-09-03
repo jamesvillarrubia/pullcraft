@@ -378,8 +378,6 @@ class PullCraft {
     gptCall(prompt) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
-            // console.log('System Prompt:', this.openaiConfig.systemPrompt + ((this.hint) ? hintPrompt + this.hint : ''));
-            // console.log('Prompt:', prompt);
             try {
                 const response = yield this.openai.chat.completions.create({
                     model: 'gpt-4-turbo',
