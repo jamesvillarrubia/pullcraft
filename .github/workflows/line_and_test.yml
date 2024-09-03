@@ -54,4 +54,5 @@ jobs:
           name: coverage-artifacts
           path: |
             coverage/
-            .nyc_coverage/
+            .nyc_output/
+      - run: ls -la
