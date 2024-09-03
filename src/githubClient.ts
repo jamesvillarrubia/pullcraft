@@ -36,10 +36,6 @@ export class OctokitClient extends GitHubClient {
   }
 }
 
-function escapeShellArg (arg: string): string {
-  return arg.replace(/`/g, '\\`');
-}
-
 export class GhClient implements GitHubClient {
   private escapeShellArg (arg: string): string {
     // Escape backticks first
@@ -51,11 +47,9 @@ export class GhClient implements GitHubClient {
 
   async listPulls (params: { owner: string; repo: string; base?: string; head?: string }): Promise<any[]> {
     const { owner, repo, base, head } = params;
-    let command = `gh pr list --json number,title,headRefName -R ${owner}/${repo}`;
-    if (base) command += ` --base ${this.escapeShellArg(base)}`;
-    if (head) command += ` --head ${this.escapeShellArg(head)}`;
-    const output = execSync(command).toString();
-    return JSON.parse(output);
+    const command = `gh pr list --json number,title,headRefName -R ${owner}/${repo} --base '${base}' --head '${head}'`;
+    const output = execSync(command).toString().trim();
+    return output ? JSON.parse(output) : [];
   }
 
   async updatePull (params: { owner: string; repo: string; pullNumber: number; title?: string; body?: string }): Promise<void> {
