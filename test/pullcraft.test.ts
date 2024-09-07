@@ -8,7 +8,10 @@ import childProcess from 'child_process';
 import fs from 'fs';
 
 // Weird bug requires these requires over from statements
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import chai = require('chai');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised as any);
 
@@ -25,7 +28,7 @@ async function testErrorHandling (
     throw new Error('Function did not throw');
   } catch (error: any) {
     expect(error.message).to.equal(expectedErrorMessage);
-    expect(consoleErrorStub.calledOnce).to.be.true;
+    expect(consoleErrorStub.calledOnce).to.equal(true);
   }
 }
 
@@ -143,34 +146,34 @@ describe('PullCraft', () => {
 
     // it('should throw an error when URL is not provided', async () => {
     //   await expect(pullCraft.openUrl('')).to.be.rejectedWith('Error: URL is required');
-    //   expect(consoleErrorStub.calledWith('Error: Please provide a value for the argument.')).to.be.true;
+    //   expect(consoleErrorStub.calledWith('Error: Please provide a value for the argument.')).to.equal(true);
     // });
 
     // it('should open URL on Linux', async () => {
     //   platformStub.value('linux');
     //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('xdg-open "https://example.com"')).to.be.true;
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on linux')).to.be.true;
+    //   expect(execStub.calledWith('xdg-open "https://example.com"')).to.equal(true);
+    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on linux')).to.equal(true);
     // });
 
     // it('should open URL on macOS', async () => {
     //   platformStub.value('darwin');
     //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('open "https://example.com"')).to.be.true;
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on darwin')).to.be.true;
+    //   expect(execStub.calledWith('open "https://example.com"')).to.equal(true);
+    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on darwin')).to.equal(true);
     // });
 
     // it('should open URL on Windows', async () => {
     //   platformStub.value('win32');
     //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('start "https://example.com"')).to.be.true;
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on win32')).to.be.true;
+    //   expect(execStub.calledWith('start "https://example.com"')).to.equal(true);
+    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on win32')).to.equal(true);
     // });
 
     // it('should log error for unsupported OS', async () => {
     //   platformStub.value('freebsd');
     //   await pullCraft.openUrl('https://example.com');
-    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.be.true;
+    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
     // });
 
     // it('should not open URL if openPr is false', async () => {
@@ -185,7 +188,7 @@ describe('PullCraft', () => {
 
     //   await pullCraft.openUrl('http://example.com');
 
-    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.be.true;
+    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
     //   Object.defineProperty(process, 'platform', { value: originalPlatform });
     // });
 
@@ -198,7 +201,7 @@ describe('PullCraft', () => {
         expect(error.message).to.equal('Failed to open URL');
       }
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.args[0][0]).to.equal('Error opening URL: Failed to open URL');
     });
   });
@@ -264,7 +267,7 @@ describe('PullCraft', () => {
       const gitStub = sinon.stub(pullCraft.git, 'raw').rejects(new Error(errorMessage));
 
       await expect(pullCraft.getNewFiles('develop', 'feature-branch')).to.be.rejectedWith(errorMessage);
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
     });
 
     it('should handle large new files', async () => {
@@ -332,7 +335,7 @@ describe('PullCraft', () => {
       gitStub.rejects(new Error(errorMessage));
 
       await expect(pullCraft.getModifiedFiles(baseBranch, compareBranch)).to.be.rejectedWith(errorMessage);
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
     });
     it('should handle large files', async () => {
       pullCraft.diffThreshold = 5;
@@ -364,7 +367,7 @@ describe('PullCraft', () => {
       const errorMessage = 'Error getting filenames';
       const gitStub = sinon.stub(pullCraft.git, 'raw').rejects(new Error(errorMessage));
       await expect(pullCraft.getFilenames(baseBranch, compareBranch)).to.be.rejectedWith(errorMessage);
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
     });
   });
 
@@ -374,14 +377,14 @@ describe('PullCraft', () => {
       openaiStub.resolves({ choices: [{ message: { content } }] });
       const response = await pullCraft.gptCall('prompt');
       expect(response).to.equal(content);
-      expect(openaiStub.calledOnce).to.be.true;
+      expect(openaiStub.calledOnce).to.equal(true);
     });
 
     it('should handle error when calling OpenAI API', async () => {
       openaiStub.rejects(new Error('Failed to call OpenAI API'));
       const response = await pullCraft.gptCall('prompt');
-      expect(response).to.be.undefined;
-      expect(openaiStub.calledOnce).to.be.true;
+      expect(response).to.equal(undefined);
+      expect(openaiStub.calledOnce).to.equal(true);
     });
 
     it('should include hint in system prompt when provided', async () => {
@@ -390,7 +393,7 @@ describe('PullCraft', () => {
 
       await pullCraft.gptCall('Test prompt');
 
-      expect(openaiStub.calledOnce).to.be.true;
+      expect(openaiStub.calledOnce).to.equal(true);
       const callArgs = openaiStub.firstCall.args[0];
       expect(callArgs.messages[0].content).to.include('This is a test hint');
     });
@@ -442,7 +445,7 @@ describe('PullCraft', () => {
         response: 'Diff dumped to test-dump.txt',
         exit: true
       });
-      expect(dumpStub.calledOnce).to.be.true;
+      expect(dumpStub.calledOnce).to.equal(true);
 
       // Reset dumpTo option
       pullCraft.dumpTo = '';
@@ -452,8 +455,8 @@ describe('PullCraft', () => {
       const gitStub = sinon.stub(pullCraft.git, 'revparse').throws(new Error('revparse error'));
 
       const result = await pullCraft.differ('develop');
-      expect(result).to.be.undefined;
-      expect(consoleErrorStub.calledWith('Error generating PR body: revparse error')).to.be.true;
+      expect(result).to.equal(undefined);
+      expect(consoleErrorStub.calledWith('Error generating PR body: revparse error')).to.equal(true);
     });
 
     it('should include hint in GPT response when provided', async () => {
@@ -471,7 +474,7 @@ describe('PullCraft', () => {
         response: 'GPT response with hint',
         exit: false
       });
-      expect(buildTextPromptStub.calledWith(sinon.match.any)).to.be.true;
+      expect(buildTextPromptStub.calledWith(sinon.match.any)).to.equal(true);
 
       // Reset hint
       pullCraft.hint = '';
@@ -490,16 +493,16 @@ describe('PullCraft', () => {
       const result = await pullCraft.differ('develop');
 
       expect(result).to.deep.equal({ response: 'Diff dumped to dump.txt', exit: true });
-      expect(dumpStub.calledOnce).to.be.true;
+      expect(dumpStub.calledOnce).to.equal(true);
 
       const dumpContent = dumpStub.firstCall.args[0];
       expect(dumpContent).to.equal('modified content');
       expect(dumpContent).to.not.include('new content');
       expect(dumpContent).to.not.include('modified-file.txt\nnew-file.txt');
 
-      expect(getModifiedFilesStub.calledOnce).to.be.true;
-      expect(getNewFilesStub.calledOnce).to.be.true;
-      expect(getFilenamesStub.calledOnce).to.be.true;
+      expect(getModifiedFilesStub.calledOnce).to.equal(true);
+      expect(getNewFilesStub.calledOnce).to.equal(true);
+      expect(getFilenamesStub.calledOnce).to.equal(true);
 
       pullCraft.dumpTo = '';
 
@@ -522,10 +525,10 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.be.true;
-      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
-      expect(getRepoInfoStub.calledOnce).to.be.true;
-      expect(listPullsStub.calledOnceWith({ owner: 'owner', repo: 'repo', head: 'feature-branch', base: 'develop' })).to.be.true;
+      expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.equal(true);
+      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.equal(true);
+      expect(getRepoInfoStub.calledOnce).to.equal(true);
+      expect(listPullsStub.calledOnceWith({ owner: 'owner', repo: 'repo', head: 'feature-branch', base: 'develop' })).to.equal(true);
       expect(createPullStub.calledOnceWith({
         owner: 'owner',
         repo: 'repo',
@@ -533,8 +536,8 @@ describe('PullCraft', () => {
         body: 'PR body',
         base: 'develop',
         head: 'feature-branch'
-      })).to.be.true;
-      expect(openUrlStub.calledOnceWith('http://example.com')).to.be.true;
+      })).to.equal(true);
+      expect(openUrlStub.calledOnceWith('http://example.com')).to.equal(true);
     });
 
     it('should handle error when creating or updating a pull request', async () => {
@@ -546,7 +549,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnceWith('Error creating PR: Failed to get current branch')).to.be.true;
+      expect(consoleErrorStub.calledOnceWith('Error creating PR: Failed to get current branch')).to.equal(true);
     });
 
     it('should include hint in PR creation when provided', async () => {
@@ -562,7 +565,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
+      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.equal(true);
       expect(createPullStub.calledOnceWith({
         owner: 'owner',
         repo: 'repo',
@@ -570,7 +573,7 @@ describe('PullCraft', () => {
         body: 'PR body with hint',
         base: 'develop',
         head: 'feature-branch'
-      })).to.be.true;
+      })).to.equal(true);
 
       // Reset hint
       pullCraft.hint = '';
@@ -582,7 +585,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('Error creating PR: Failed to get repo info');
     });
 
@@ -593,7 +596,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('AI Response could not be parsed');
     });
 
@@ -604,7 +607,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('PR body could not be retrieved');
     });
 
@@ -615,7 +618,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('PR title could not be retrieved');
     });
 
@@ -626,7 +629,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('Cannot destructure');
     });
     it('should handle case when getRepoInfo returns null', async () => {
@@ -635,7 +638,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr();
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('Repository information could not be retrieved');
     });
 
@@ -645,7 +648,7 @@ describe('PullCraft', () => {
 
       const result = await pullCraft.createPr();
 
-      expect(result).to.be.undefined;
+      expect(result).to.equal(undefined);
     });
   });
 
@@ -655,7 +658,7 @@ describe('PullCraft', () => {
       pullCraft.dumpTo = 'test-dump.txt';
       pullCraft.dump('Test diff content');
 
-      expect(fsWriteFileSync.calledOnceWith('test-dump.txt', 'Test diff content')).to.be.true;
+      expect(fsWriteFileSync.calledOnceWith('test-dump.txt', 'Test diff content')).to.equal(true);
       fsWriteFileSync.restore();
     });
   });
@@ -685,7 +688,7 @@ describe('PullCraft', () => {
     it('should return false when gh CLI is not available', () => {
       const execSyncStub = sinon.stub(childProcess, 'execSync').throws();
       const result = pullCraft.isGhCliAvailable();
-      expect(result).to.be.false;
+      expect(result).to.equal(false);
       execSyncStub.restore();
     });
   });

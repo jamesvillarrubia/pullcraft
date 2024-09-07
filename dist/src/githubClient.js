@@ -35,9 +35,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GhClient = exports.OctokitClient = exports.GitHubClient = void 0;
 const child_process_1 = require("child_process");
 let Octokit;
-Promise.resolve().then(() => __importStar(require('@octokit/rest'))).then(module => {
-    Octokit = module.Octokit;
-});
 class GitHubClient {
     listPulls(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head }) {
@@ -59,7 +56,13 @@ exports.GitHubClient = GitHubClient;
 class OctokitClient extends GitHubClient {
     constructor(githubToken) {
         super();
-        this.octokit = new Octokit({ auth: githubToken });
+        this.initializeOctokit(githubToken);
+    }
+    initializeOctokit(githubToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { Octokit } = yield Promise.resolve().then(() => __importStar(require('@octokit/rest')));
+            this.octokit = new Octokit({ auth: githubToken });
+        });
     }
     listPulls(_a) {
         return __awaiter(this, arguments, void 0, function* ({ owner, repo, base, head }) {

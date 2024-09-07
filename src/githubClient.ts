@@ -1,9 +1,5 @@
 import { execSync } from 'child_process';
-
 let Octokit: any;
-import('@octokit/rest').then(module => {
-  Octokit = module.Octokit;
-});
 
 export class GitHubClient {
   async listPulls ({ owner, repo, base, head }:{owner: string, repo: string, base: string, head: string}): Promise<any> {
@@ -24,6 +20,11 @@ export class OctokitClient extends GitHubClient {
 
   constructor (githubToken: string) {
     super();
+    this.initializeOctokit(githubToken);
+  }
+
+  private async initializeOctokit (githubToken: string) {
+    const { Octokit } = await import('@octokit/rest');
     this.octokit = new Octokit({ auth: githubToken });
   }
 
