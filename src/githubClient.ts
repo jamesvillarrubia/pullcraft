@@ -1,5 +1,9 @@
-import { Octokit } from '@octokit/rest';
 import { execSync } from 'child_process';
+
+let Octokit: any;
+import('@octokit/rest').then(module => {
+  Octokit = module.Octokit;
+});
 
 export class GitHubClient {
   async listPulls ({ owner, repo, base, head }:{owner: string, repo: string, base: string, head: string}): Promise<any> {
