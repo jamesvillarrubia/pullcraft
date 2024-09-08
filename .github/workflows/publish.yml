@@ -30,6 +30,7 @@ jobs:
   #     - main # only works on PRs with base_ref=main and follows limits below
 
 jobs:
+<<<<<<< HEAD
   test:
 <<<<<<< HEAD
     name: Release Test
@@ -47,6 +48,12 @@ jobs:
 =======
     needs: test
 >>>>>>> 69d178f (tweak)
+=======
+  # test:
+  #   uses: ./.github/workflows/line_and_test.yml
+  release:
+    # needs: test
+>>>>>>> 75f47b1 (tweak)
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -83,6 +90,7 @@ jobs:
   prerelease:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     needs: lint_and_test
     if: |
       (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
@@ -92,6 +100,9 @@ jobs:
 =======
     needs: test
 >>>>>>> 69d178f (tweak)
+=======
+    # needs: test
+>>>>>>> 75f47b1 (tweak)
     name: PreRelease
     runs-on: ubuntu-latest
     env:
