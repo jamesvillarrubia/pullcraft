@@ -8,13 +8,18 @@ on:
       - beta
       - alpha
 <<<<<<< HEAD
+<<<<<<< HEAD
   pull_request:
 <<<<<<< HEAD
+=======
+  pull_request:
+>>>>>>> c302bb0 (tweak)
     types: [closed]
     branches:
       - main
       - beta
       - alpha
+<<<<<<< HEAD
 =======
     branches:
       - main # only works on PRs with base_ref=main and follows limits below
@@ -54,6 +59,18 @@ jobs:
   release:
     # needs: test
 >>>>>>> 75f47b1 (tweak)
+=======
+
+jobs:
+  lint_and_test:
+    uses: ./.github/workflows/line_and_test.yml
+
+  release:
+    needs: lint_and_test
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+>>>>>>> c302bb0 (tweak)
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -91,6 +108,7 @@ jobs:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     needs: lint_and_test
     if: |
       (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
@@ -103,6 +121,12 @@ jobs:
 =======
     # needs: test
 >>>>>>> 75f47b1 (tweak)
+=======
+    needs: lint_and_test
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha')) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && (github.event.pull_request.base.ref == 'beta' || github.event.pull_request.base.ref == 'alpha'))
+>>>>>>> c302bb0 (tweak)
     name: PreRelease
     runs-on: ubuntu-latest
     env:
