@@ -14,10 +14,14 @@ on:
   workflow_dispatch: # allows manual trigger
   workflow_call:
 <<<<<<< HEAD
+<<<<<<< HEAD
   # pull_request: # runs on all pull requests
 =======
   pull_request: # runs on all pull requests
 >>>>>>> c302bb0 (tweak)
+=======
+  # pull_request: # runs on all pull requests
+>>>>>>> 7d39877 (tweak)
   push:
     branches-ignore:
       - main
