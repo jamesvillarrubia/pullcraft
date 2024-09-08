@@ -59,6 +59,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-artifacts
-          path: |
-            coverage/
+          path: coverage/
       - run: ls -la
