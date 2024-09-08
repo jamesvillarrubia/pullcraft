@@ -13,9 +13,7 @@ on:
 
 jobs:
   test:
-    name: Release Test
-    uses: ./.github/workflows/line_and_test.yml#test
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    uses: ./.github/workflows/line_and_test.yml
   release:
     needs: test
     name: Release
