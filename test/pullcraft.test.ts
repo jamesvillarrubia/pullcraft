@@ -1,16 +1,17 @@
 // import { describe, it, beforeEach, afterEach } from 'node:test';
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import * as nock from 'nock';
+import nock from 'nock'; // Change this line
+
 import * as sinon from 'sinon';
 import PullCraft from '../src/index';
 import childProcess from 'child_process';
+
 import fs from 'fs';
 
-// Weird bug requires these requires over from statements
-import chai = require('chai');
-import chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised as any);
+import * as chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+chai.use(chaiAsPromised);
 
 delete process.env.OPENAI_API_KEY;
 delete process.env.GITHUB_TOKEN;
@@ -25,7 +26,7 @@ async function testErrorHandling (
     throw new Error('Function did not throw');
   } catch (error: any) {
     expect(error.message).to.equal(expectedErrorMessage);
-    expect(consoleErrorStub.calledOnce).to.be.true;
+    expect(consoleErrorStub.calledOnce).to.equal(true);
   }
 }
 
@@ -66,74 +67,74 @@ describe('PullCraft', () => {
     consoleLogStub.restore();
   });
 
-  // describe('Constructor', () => {
-  //   it('should throw an error if OPENAI_API_KEY is not set', () => {
-  //     expect(() => new PullCraft({ githubToken: 'fake-github-token' })).to.throw('Error: OPENAI_API_KEY is not set');
-  //   });
+  describe('Constructor', () => {
+    it('should throw an error if OPENAI_API_KEY is not set', () => {
+      expect(() => new PullCraft({ githubToken: 'fake-github-token' })).to.throw('Error: OPENAI_API_KEY is not set');
+    });
 
-  //   it('should throw an error if GITHUB_TOKEN is not set', () => {
-  //     expect(() => new PullCraft({ openai: { apiKey: 'fake-openai-api-key' }, githubStrategy: 'octokit' })).to.throw('Error: GITHUB_TOKEN is not set');
-  //   });
+    it('should throw an error if GITHUB_TOKEN is not set', () => {
+      expect(() => new PullCraft({ openai: { apiKey: 'fake-openai-api-key' }, githubStrategy: 'octokit' })).to.throw('Error: GITHUB_TOKEN is not set');
+    });
 
-  //   it('should throw an error for invalid githubStrategy', () => {
-  //     expect(() => new PullCraft({
-  //       openai: { apiKey: 'fake-key' },
-  //       githubToken: 'fake-token',
-  //       githubStrategy: 'invalid'
-  //     })).to.throw('Error: githubStrategy must be \'gh\' or \'octokit\'. Defaults to \'gh\'.');
-  //   });
-  // });
+    it('should throw an error for invalid githubStrategy', () => {
+      expect(() => new PullCraft({
+        openai: { apiKey: 'fake-key' },
+        githubToken: 'fake-token',
+        githubStrategy: 'invalid'
+      })).to.throw('Error: githubStrategy must be \'gh\' or \'octokit\'. Defaults to \'gh\'.');
+    });
+  });
 
-  // describe('replacePlaceholders', () => {
-  //   it('should replace a single placeholder in the template string', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = { name: 'World' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, World!');
-  //   });
+  describe('replacePlaceholders', () => {
+    it('should replace a single placeholder in the template string', () => {
+      const template = 'Hello, __name__!';
+      const replacements = { name: 'World' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, World!');
+    });
 
-  //   it('should replace multiple placeholders in the template string', () => {
-  //     const template = 'Hello, __name__! Welcome to __place__.';
-  //     const replacements = { name: 'Alice', place: 'Wonderland' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, Alice! Welcome to Wonderland.');
-  //   });
+    it('should replace multiple placeholders in the template string', () => {
+      const template = 'Hello, __name__! Welcome to __place__.';
+      const replacements = { name: 'Alice', place: 'Wonderland' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, Alice! Welcome to Wonderland.');
+    });
 
-  //   it('should handle placeholders with different patterns', () => {
-  //     const template = 'Hello, {{name}}!';
-  //     const replacements = { name: 'Bob' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements, '{{KEY}}');
-  //     expect(result).to.equal('Hello, Bob!');
-  //   });
+    it('should handle placeholders with different patterns', () => {
+      const template = 'Hello, {{name}}!';
+      const replacements = { name: 'Bob' };
+      const result = pullCraft.replacePlaceholders(template, replacements, '{{KEY}}');
+      expect(result).to.equal('Hello, Bob!');
+    });
 
-  //   it('should not replace anything if no placeholders match', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = { place: 'World' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, __name__!');
-  //   });
+    it('should not replace anything if no placeholders match', () => {
+      const template = 'Hello, __name__!';
+      const replacements = { place: 'World' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, __name__!');
+    });
 
-  //   it('should replace placeholders with empty strings if the value is empty', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = { name: '' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, !');
-  //   });
+    it('should replace placeholders with empty strings if the value is empty', () => {
+      const template = 'Hello, __name__!';
+      const replacements = { name: '' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, !');
+    });
 
-  //   it('should leave placeholder alone if replacements are empty', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = {};
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, __name__!');
-  //   });
+    it('should leave placeholder alone if replacements are empty', () => {
+      const template = 'Hello, __name__!';
+      const replacements = {};
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, __name__!');
+    });
 
-  //   it('should leave template alone if there are no placeholders', () => {
-  //     const template = 'Hello, name!';
-  //     const replacements = {};
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, name!');
-  //   });
-  // });
+    it('should leave template alone if there are no placeholders', () => {
+      const template = 'Hello, name!';
+      const replacements = {};
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, name!');
+    });
+  });
 
   describe('openUrl', () => {
     let platformStub: sinon.SinonStub;
@@ -141,53 +142,57 @@ describe('PullCraft', () => {
       platformStub = sinon.stub(process, 'platform');
     });
 
-    // it('should throw an error when URL is not provided', async () => {
-    //   await expect(pullCraft.openUrl('')).to.be.rejectedWith('Error: URL is required');
-    //   expect(consoleErrorStub.calledWith('Error: Please provide a value for the argument.')).to.be.true;
-    // });
+    afterEach(() => {
+      platformStub.restore();
+    });
 
-    // it('should open URL on Linux', async () => {
-    //   platformStub.value('linux');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('xdg-open "https://example.com"')).to.be.true;
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on linux')).to.be.true;
-    // });
+    it('should throw an error when URL is not provided', async () => {
+      await expect(pullCraft.openUrl('')).to.be.rejectedWith('Error: URL is required');
+      expect(consoleErrorStub.calledWith('Error: Please provide a value for the argument.')).to.equal(true);
+    });
 
-    // it('should open URL on macOS', async () => {
-    //   platformStub.value('darwin');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('open "https://example.com"')).to.be.true;
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on darwin')).to.be.true;
-    // });
+    it('should open URL on Linux', async () => {
+      platformStub.value('linux');
+      await pullCraft.openUrl('https://example.com');
+      expect(execStub.calledWith('xdg-open "https://example.com"')).to.equal(true);
+      expect(consoleLogStub.calledWith('Opening URL: https://example.com on linux')).to.equal(true);
+    });
 
-    // it('should open URL on Windows', async () => {
-    //   platformStub.value('win32');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('start "https://example.com"')).to.be.true;
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on win32')).to.be.true;
-    // });
+    it('should open URL on macOS', async () => {
+      platformStub.value('darwin');
+      await pullCraft.openUrl('https://example.com');
+      expect(execStub.calledWith('open "https://example.com"')).to.equal(true);
+      expect(consoleLogStub.calledWith('Opening URL: https://example.com on darwin')).to.equal(true);
+    });
 
-    // it('should log error for unsupported OS', async () => {
-    //   platformStub.value('freebsd');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.be.true;
-    // });
+    it('should open URL on Windows', async () => {
+      platformStub.value('win32');
+      await pullCraft.openUrl('https://example.com');
+      expect(execStub.calledWith('start "https://example.com"')).to.equal(true);
+      expect(consoleLogStub.calledWith('Opening URL: https://example.com on win32')).to.equal(true);
+    });
 
-    // it('should not open URL if openPr is false', async () => {
-    //   pullCraft.openPr = false;
-    //   await pullCraft.openUrl('http://example.com');
-    //   expect(execStub.called).to.be.false;
-    // });
+    it('should log error for unsupported OS', async () => {
+      platformStub.value('freebsd');
+      await pullCraft.openUrl('https://example.com');
+      expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
+    });
 
-    // it('should handle unsupported OS', async () => {
-    //   const originalPlatform = process.platform;
-    //   Object.defineProperty(process, 'platform', { value: 'unsupported' });
+    it('should not open URL if openPr is false', async () => {
+      pullCraft.openPr = false;
+      await pullCraft.openUrl('http://example.com');
+      expect(execStub.called).to.equal(false);
+    });
 
-    //   await pullCraft.openUrl('http://example.com');
+    it('should handle unsupported OS', async () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'unsupported' });
 
-    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.be.true;
-    //   Object.defineProperty(process, 'platform', { value: originalPlatform });
-    // });
+      await pullCraft.openUrl('http://example.com');
+
+      expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
+      Object.defineProperty(process, 'platform', { value: originalPlatform });
+    });
 
     it('should handle error when opening URL', async () => {
       execStub.throws(new Error('Failed to open URL'));
@@ -198,7 +203,7 @@ describe('PullCraft', () => {
         expect(error.message).to.equal('Failed to open URL');
       }
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.args[0][0]).to.equal('Error opening URL: Failed to open URL');
     });
   });
@@ -264,7 +269,7 @@ describe('PullCraft', () => {
       const gitStub = sinon.stub(pullCraft.git, 'raw').rejects(new Error(errorMessage));
 
       await expect(pullCraft.getNewFiles('develop', 'feature-branch')).to.be.rejectedWith(errorMessage);
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
     });
 
     it('should handle large new files', async () => {
@@ -332,7 +337,7 @@ describe('PullCraft', () => {
       gitStub.rejects(new Error(errorMessage));
 
       await expect(pullCraft.getModifiedFiles(baseBranch, compareBranch)).to.be.rejectedWith(errorMessage);
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
     });
     it('should handle large files', async () => {
       pullCraft.diffThreshold = 5;
@@ -364,7 +369,7 @@ describe('PullCraft', () => {
       const errorMessage = 'Error getting filenames';
       const gitStub = sinon.stub(pullCraft.git, 'raw').rejects(new Error(errorMessage));
       await expect(pullCraft.getFilenames(baseBranch, compareBranch)).to.be.rejectedWith(errorMessage);
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
     });
   });
 
@@ -374,14 +379,14 @@ describe('PullCraft', () => {
       openaiStub.resolves({ choices: [{ message: { content } }] });
       const response = await pullCraft.gptCall('prompt');
       expect(response).to.equal(content);
-      expect(openaiStub.calledOnce).to.be.true;
+      expect(openaiStub.calledOnce).to.equal(true);
     });
 
     it('should handle error when calling OpenAI API', async () => {
       openaiStub.rejects(new Error('Failed to call OpenAI API'));
       const response = await pullCraft.gptCall('prompt');
-      expect(response).to.be.undefined;
-      expect(openaiStub.calledOnce).to.be.true;
+      expect(response).to.equal(undefined);
+      expect(openaiStub.calledOnce).to.equal(true);
     });
 
     it('should include hint in system prompt when provided', async () => {
@@ -390,7 +395,7 @@ describe('PullCraft', () => {
 
       await pullCraft.gptCall('Test prompt');
 
-      expect(openaiStub.calledOnce).to.be.true;
+      expect(openaiStub.calledOnce).to.equal(true);
       const callArgs = openaiStub.firstCall.args[0];
       expect(callArgs.messages[0].content).to.include('This is a test hint');
     });
@@ -442,7 +447,7 @@ describe('PullCraft', () => {
         response: 'Diff dumped to test-dump.txt',
         exit: true
       });
-      expect(dumpStub.calledOnce).to.be.true;
+      expect(dumpStub.calledOnce).to.equal(true);
 
       // Reset dumpTo option
       pullCraft.dumpTo = '';
@@ -452,8 +457,8 @@ describe('PullCraft', () => {
       const gitStub = sinon.stub(pullCraft.git, 'revparse').throws(new Error('revparse error'));
 
       const result = await pullCraft.differ('develop');
-      expect(result).to.be.undefined;
-      expect(consoleErrorStub.calledWith('Error generating PR body: revparse error')).to.be.true;
+      expect(result).to.equal(undefined);
+      expect(consoleErrorStub.calledWith('Error generating PR body: revparse error')).to.equal(true);
     });
 
     it('should include hint in GPT response when provided', async () => {
@@ -471,7 +476,7 @@ describe('PullCraft', () => {
         response: 'GPT response with hint',
         exit: false
       });
-      expect(buildTextPromptStub.calledWith(sinon.match.any)).to.be.true;
+      expect(buildTextPromptStub.calledWith(sinon.match.any)).to.equal(true);
 
       // Reset hint
       pullCraft.hint = '';
@@ -490,16 +495,16 @@ describe('PullCraft', () => {
       const result = await pullCraft.differ('develop');
 
       expect(result).to.deep.equal({ response: 'Diff dumped to dump.txt', exit: true });
-      expect(dumpStub.calledOnce).to.be.true;
+      expect(dumpStub.calledOnce).to.equal(true);
 
       const dumpContent = dumpStub.firstCall.args[0];
       expect(dumpContent).to.equal('modified content');
       expect(dumpContent).to.not.include('new content');
       expect(dumpContent).to.not.include('modified-file.txt\nnew-file.txt');
 
-      expect(getModifiedFilesStub.calledOnce).to.be.true;
-      expect(getNewFilesStub.calledOnce).to.be.true;
-      expect(getFilenamesStub.calledOnce).to.be.true;
+      expect(getModifiedFilesStub.calledOnce).to.equal(true);
+      expect(getNewFilesStub.calledOnce).to.equal(true);
+      expect(getFilenamesStub.calledOnce).to.equal(true);
 
       pullCraft.dumpTo = '';
 
@@ -522,10 +527,10 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.be.true;
-      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
-      expect(getRepoInfoStub.calledOnce).to.be.true;
-      expect(listPullsStub.calledOnceWith({ owner: 'owner', repo: 'repo', head: 'feature-branch', base: 'develop' })).to.be.true;
+      expect(gitStub.calledOnceWith(['--abbrev-ref', 'HEAD'])).to.equal(true);
+      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.equal(true);
+      expect(getRepoInfoStub.calledOnce).to.equal(true);
+      expect(listPullsStub.calledOnceWith({ owner: 'owner', repo: 'repo', head: 'feature-branch', base: 'develop' })).to.equal(true);
       expect(createPullStub.calledOnceWith({
         owner: 'owner',
         repo: 'repo',
@@ -533,8 +538,8 @@ describe('PullCraft', () => {
         body: 'PR body',
         base: 'develop',
         head: 'feature-branch'
-      })).to.be.true;
-      expect(openUrlStub.calledOnceWith('http://example.com')).to.be.true;
+      })).to.equal(true);
+      expect(openUrlStub.calledOnceWith('http://example.com')).to.equal(true);
     });
 
     it('should handle error when creating or updating a pull request', async () => {
@@ -546,7 +551,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnceWith('Error creating PR: Failed to get current branch')).to.be.true;
+      expect(consoleErrorStub.calledOnceWith('Error creating PR: Failed to get current branch')).to.equal(true);
     });
 
     it('should include hint in PR creation when provided', async () => {
@@ -562,7 +567,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.be.true;
+      expect(differStub.calledOnceWith('develop', 'feature-branch')).to.equal(true);
       expect(createPullStub.calledOnceWith({
         owner: 'owner',
         repo: 'repo',
@@ -570,7 +575,7 @@ describe('PullCraft', () => {
         body: 'PR body with hint',
         base: 'develop',
         head: 'feature-branch'
-      })).to.be.true;
+      })).to.equal(true);
 
       // Reset hint
       pullCraft.hint = '';
@@ -582,7 +587,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('Error creating PR: Failed to get repo info');
     });
 
@@ -593,7 +598,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('AI Response could not be parsed');
     });
 
@@ -604,7 +609,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('PR body could not be retrieved');
     });
 
@@ -615,7 +620,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('PR title could not be retrieved');
     });
 
@@ -626,7 +631,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('Cannot destructure');
     });
     it('should handle case when getRepoInfo returns null', async () => {
@@ -635,7 +640,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr();
 
-      expect(consoleErrorStub.calledOnce).to.be.true;
+      expect(consoleErrorStub.calledOnce).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include('Repository information could not be retrieved');
     });
 
@@ -645,7 +650,7 @@ describe('PullCraft', () => {
 
       const result = await pullCraft.createPr();
 
-      expect(result).to.be.undefined;
+      expect(result).to.equal(undefined);
     });
   });
 
@@ -655,7 +660,7 @@ describe('PullCraft', () => {
       pullCraft.dumpTo = 'test-dump.txt';
       pullCraft.dump('Test diff content');
 
-      expect(fsWriteFileSync.calledOnceWith('test-dump.txt', 'Test diff content')).to.be.true;
+      expect(fsWriteFileSync.calledOnceWith('test-dump.txt', 'Test diff content')).to.equal(true);
       fsWriteFileSync.restore();
     });
   });
@@ -685,7 +690,7 @@ describe('PullCraft', () => {
     it('should return false when gh CLI is not available', () => {
       const execSyncStub = sinon.stub(childProcess, 'execSync').throws();
       const result = pullCraft.isGhCliAvailable();
-      expect(result).to.be.false;
+      expect(result).to.equal(false);
       execSyncStub.restore();
     });
   });

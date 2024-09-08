@@ -1,0 +1,5 @@
+{
+    "openPr": true,
+    "baseDefault": "main",
+    "githubStrategy": "gh"
+}

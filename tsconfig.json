@@ -1,13 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "strict": true,
+    "target": "es2018",
+    "module": "ES2020",
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "rootDir": ".",
     "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node", "mocha"]
+
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "bin/**/*.ts"],
+  "include": ["src/**/*", "bin/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

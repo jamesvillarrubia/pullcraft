@@ -1,9 +1,9 @@
 import simpleGit from 'simple-git';
-import { systemPrompt, titleTemplate, bodyTemplate, hintPrompt } from './prompt';
+import { systemPrompt, titleTemplate, bodyTemplate, hintPrompt } from './prompt.js';
 import { cosmiconfigSync } from 'cosmiconfig';
 import OpenAI from 'openai';
-import { ChildProcess, execSync, exec } from 'child_process';
-import { GitHubClient, OctokitClient, GhClient } from './githubClient';
+import cp, { ChildProcess, execSync, exec } from 'child_process';
+import { GitHubClient, OctokitClient, GhClient } from './githubClient.js';
 import fs from 'fs';
 
 const configName = 'pullcraft';
@@ -134,7 +134,7 @@ export class PullCraft {
 
   isGhCliAvailable () {
     try {
-      execSync('gh auth status');
+      cp.execSync('gh auth status');
       return true;
     } catch {
       return false;
@@ -154,13 +154,13 @@ export class PullCraft {
       switch (osType) {
         case 'linux':
           // Linux
-          return exec(`xdg-open "${url}"`);
+          return cp.exec(`xdg-open "${url}"`);
         case 'darwin':
           // macOS
-          return exec(`open "${url}"`);
+          return cp.exec(`open "${url}"`);
         case 'win32':
           // Windows
-          return exec(`start "${url}"`);
+          return cp.exec(`start "${url}"`);
         default:
           console.error('Unsupported OS');
       }

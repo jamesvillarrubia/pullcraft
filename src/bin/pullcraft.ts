@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import PullCraft from '../src/index'; // Adjust the path to where your PullCraft class is located
+import PullCraft from '../index.js'; // Adjust the path to where your PullCraft class is located
 import dotenv from 'dotenv';
 
 import { Command } from 'commander';

@@ -1,22 +1,29 @@
 name: Lint & Test
 
 on:
+  # workflow_dispatch: # allows manual trigger
+  # workflow_call:
+  # push: # only triggers on push events from non-stable branches
+  #   branches-ignore:
+  #     - main
+  #     - beta
+  #     - alpha
+  # pull_request:
+  #   branches:
+  #     - main # only works on PRs with base_ref=main and follows limits below
   workflow_dispatch: # allows manual trigger
   workflow_call:
-  push: # only triggers on push events from non-stable branches
+  # pull_request: # runs on all pull requests
+  push:
     branches-ignore:
       - main
       - beta
       - alpha
-  pull_request:
-    branches:
-      - main # only works on PRs with base_ref=main and follows limits below
-
 jobs:
   test: 
     name: 'Node.js v${{ matrix.node }}'
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request' && startsWith(github.head_ref,'update-dependencies-') && github.base_ref == 'main') || github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.head_ref == 'main'
+    # if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.head_ref == 'main' ||  (github.event_name == 'pull_request' && startsWith(github.head_ref,'update-dependencies-') && github.base_ref == 'main')
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -54,5 +61,4 @@ jobs:
           name: coverage-artifacts
           path: |
             coverage/
-            .nyc_output/
       - run: ls -la

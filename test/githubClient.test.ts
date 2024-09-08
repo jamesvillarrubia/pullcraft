@@ -87,19 +87,19 @@ describe('GitHubClient', () => {
     it('should call octokit.pulls.list for listPulls', async () => {
       const params = { owner: 'test', repo: 'test', base: 'main', head: 'feature' };
       await client.listPulls(params);
-      expect(octokitStub.pulls.list.calledOnceWith(params)).to.be.true;
+      expect(octokitStub.pulls.list.calledOnceWith(params)).to.equal(true);
     });
 
     it('should call octokit.pulls.update for updatePull', async () => {
       const params = { owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' };
       await client.updatePull(params);
-      expect(octokitStub.pulls.update.calledOnceWith(params)).to.be.true;
+      expect(octokitStub.pulls.update.calledOnceWith(params)).to.equal(true);
     });
 
     it('should call octokit.pulls.create for createPull', async () => {
       const params = { owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' };
       await client.createPull(params);
-      expect(octokitStub.pulls.create.calledOnceWith(params)).to.be.true;
+      expect(octokitStub.pulls.create.calledOnceWith(params)).to.equal(true);
     });
   });
 
@@ -119,7 +119,7 @@ describe('GitHubClient', () => {
     it('should call gh cli for listPulls', async () => {
       execSyncStub.returns(Buffer.from('[{"number": 1}]'));
       const result = await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       expect(execSyncStub.firstCall.args[0]).to.include('gh pr list');
       expect(result).to.deep.equal([{ number: 1 }]);
     });
@@ -127,14 +127,14 @@ describe('GitHubClient', () => {
     it('should call gh cli for updatePull', async () => {
       execSyncStub.returns(Buffer.from(''));
       await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       expect(execSyncStub.firstCall.args[0]).to.include('gh pr edit');
     });
 
     it('should call gh cli for createPull', async () => {
       execSyncStub.returns(Buffer.from('https://github.com/test/test/pull/1'));
       const result = await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       expect(execSyncStub.firstCall.args[0]).to.include('gh pr create');
       expect(result).to.deep.equal({ data: { html_url: 'https://github.com/test/test/pull/1' } });
     });
@@ -225,7 +225,7 @@ describe('GitHubClient', () => {
         title: 'New Title',
         body: 'New Body'
       });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       const callArg = execSyncStub.firstCall.args[0] as string;
       expect(callArg).to.include('--title \'New Title\'');
       expect(callArg).to.include('--body \'New Body\'');
@@ -238,7 +238,7 @@ describe('GitHubClient', () => {
         repo: 'test',
         pullNumber: 1
       });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       const callArg = execSyncStub.firstCall.args[0] as string;
       expect(callArg).to.not.include('--title');
       expect(callArg).to.not.include('--body');
@@ -254,7 +254,7 @@ describe('GitHubClient', () => {
         title: 'Test',
         body: 'Test Body'
       });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       const callArg = execSyncStub.firstCall.args[0] as string;
       expect(callArg).to.include('--body \'Test Body\'');
     });
@@ -268,7 +268,7 @@ describe('GitHubClient', () => {
         head: 'feature',
         title: 'Test'
       });
-      expect(execSyncStub.calledOnce).to.be.true;
+      expect(execSyncStub.calledOnce).to.equal(true);
       const callArg = execSyncStub.firstCall.args[0] as string;
       expect(callArg).to.not.include('--body');
     });

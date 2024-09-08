@@ -1,0 +1,19 @@
+{
+    "all": true,
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.test.ts",
+      "**/bin/**/*"
+    ],
+    "reporter": [
+      "text",
+      "lcov"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "reportDir": "./coverage",
+    "perFile": true,
+    "skipFull": false
+  }
