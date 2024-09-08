@@ -31,10 +31,14 @@ jobs:
 
 jobs:
   test:
+<<<<<<< HEAD
     name: Release Test
     uses: ./.github/workflows/line_and_test.yml#test
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
 >>>>>>> 2be5c7c (tweak)
+=======
+    uses: ./.github/workflows/line_and_test.yml
+>>>>>>> a4a4ca1 (tweak)
   release:
 <<<<<<< HEAD
     needs: lint_and_test
