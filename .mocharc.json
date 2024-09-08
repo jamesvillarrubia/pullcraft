@@ -1,0 +1,13 @@
+{
+  "require": ["ts-node/register"],
+  "loader": "ts-node/esm",
+  "experimental": true,
+  "experimental-specifier-resolution": "node",
+  "extension": ["ts"],
+  "spec": "test/**/*.test.ts",
+  "watch-files": ["src/**/*.ts", "test/**/*.ts"],
+  "timeout": 100000,
+  "diff": true,
+  "reporter": "spec",
+  "package": "./package.json"
+}

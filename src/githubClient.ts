@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import cp, { execSync } from 'child_process';
 let Octokit: any;
 
 export class GitHubClient {
@@ -53,7 +53,7 @@ export class GhClient implements GitHubClient {
   async listPulls (params: { owner: string; repo: string; base?: string; head?: string }): Promise<any[]> {
     const { owner, repo, base, head } = params;
     const command = `gh pr list --json number,title,headRefName -R ${owner}/${repo} --base '${base}' --head '${head}'`;
-    const output = execSync(command).toString().trim();
+    const output = cp.execSync(command).toString().trim();
     return output ? JSON.parse(output) : [];
   }
 
@@ -62,14 +62,14 @@ export class GhClient implements GitHubClient {
     let command = `gh pr edit ${pullNumber} -R ${owner}/${repo}`;
     if (title) command += ` --title ${this.escapeShellArg(title)}`;
     if (body) command += ` --body ${this.escapeShellArg(body)}`;
-    execSync(command);
+    cp.execSync(command);
   }
 
   async createPull (params: { owner: string; repo: string; base: string; head: string; title: string; body?: string }): Promise<{ data: { html_url: string } }> {
     const { owner, repo, base, head, title, body } = params;
     let command = `gh pr create -R ${owner}/${repo} --base ${this.escapeShellArg(base)} --head ${this.escapeShellArg(head)} --title ${this.escapeShellArg(title)}`;
     if (body) command += ` --body ${this.escapeShellArg(body)}`;
-    const output = execSync(command).toString().trim();
+    const output = cp.execSync(command).toString().trim();
     return { data: { html_url: output } };
   }
 }

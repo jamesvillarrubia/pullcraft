@@ -1,19 +1,17 @@
 // import { describe, it, beforeEach, afterEach } from 'node:test';
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import * as nock from 'nock';
+import nock from 'nock'; // Change this line
+
 import * as sinon from 'sinon';
 import PullCraft from '../src/index';
 import childProcess from 'child_process';
+
 import fs from 'fs';
 
-// Weird bug requires these requires over from statements
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import chai = require('chai');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised as any);
+import * as chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+chai.use(chaiAsPromised);
 
 delete process.env.OPENAI_API_KEY;
 delete process.env.GITHUB_TOKEN;
@@ -69,74 +67,74 @@ describe('PullCraft', () => {
     consoleLogStub.restore();
   });
 
-  // describe('Constructor', () => {
-  //   it('should throw an error if OPENAI_API_KEY is not set', () => {
-  //     expect(() => new PullCraft({ githubToken: 'fake-github-token' })).to.throw('Error: OPENAI_API_KEY is not set');
-  //   });
+  describe('Constructor', () => {
+    it('should throw an error if OPENAI_API_KEY is not set', () => {
+      expect(() => new PullCraft({ githubToken: 'fake-github-token' })).to.throw('Error: OPENAI_API_KEY is not set');
+    });
 
-  //   it('should throw an error if GITHUB_TOKEN is not set', () => {
-  //     expect(() => new PullCraft({ openai: { apiKey: 'fake-openai-api-key' }, githubStrategy: 'octokit' })).to.throw('Error: GITHUB_TOKEN is not set');
-  //   });
+    it('should throw an error if GITHUB_TOKEN is not set', () => {
+      expect(() => new PullCraft({ openai: { apiKey: 'fake-openai-api-key' }, githubStrategy: 'octokit' })).to.throw('Error: GITHUB_TOKEN is not set');
+    });
 
-  //   it('should throw an error for invalid githubStrategy', () => {
-  //     expect(() => new PullCraft({
-  //       openai: { apiKey: 'fake-key' },
-  //       githubToken: 'fake-token',
-  //       githubStrategy: 'invalid'
-  //     })).to.throw('Error: githubStrategy must be \'gh\' or \'octokit\'. Defaults to \'gh\'.');
-  //   });
-  // });
+    it('should throw an error for invalid githubStrategy', () => {
+      expect(() => new PullCraft({
+        openai: { apiKey: 'fake-key' },
+        githubToken: 'fake-token',
+        githubStrategy: 'invalid'
+      })).to.throw('Error: githubStrategy must be \'gh\' or \'octokit\'. Defaults to \'gh\'.');
+    });
+  });
 
-  // describe('replacePlaceholders', () => {
-  //   it('should replace a single placeholder in the template string', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = { name: 'World' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, World!');
-  //   });
+  describe('replacePlaceholders', () => {
+    it('should replace a single placeholder in the template string', () => {
+      const template = 'Hello, __name__!';
+      const replacements = { name: 'World' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, World!');
+    });
 
-  //   it('should replace multiple placeholders in the template string', () => {
-  //     const template = 'Hello, __name__! Welcome to __place__.';
-  //     const replacements = { name: 'Alice', place: 'Wonderland' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, Alice! Welcome to Wonderland.');
-  //   });
+    it('should replace multiple placeholders in the template string', () => {
+      const template = 'Hello, __name__! Welcome to __place__.';
+      const replacements = { name: 'Alice', place: 'Wonderland' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, Alice! Welcome to Wonderland.');
+    });
 
-  //   it('should handle placeholders with different patterns', () => {
-  //     const template = 'Hello, {{name}}!';
-  //     const replacements = { name: 'Bob' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements, '{{KEY}}');
-  //     expect(result).to.equal('Hello, Bob!');
-  //   });
+    it('should handle placeholders with different patterns', () => {
+      const template = 'Hello, {{name}}!';
+      const replacements = { name: 'Bob' };
+      const result = pullCraft.replacePlaceholders(template, replacements, '{{KEY}}');
+      expect(result).to.equal('Hello, Bob!');
+    });
 
-  //   it('should not replace anything if no placeholders match', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = { place: 'World' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, __name__!');
-  //   });
+    it('should not replace anything if no placeholders match', () => {
+      const template = 'Hello, __name__!';
+      const replacements = { place: 'World' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, __name__!');
+    });
 
-  //   it('should replace placeholders with empty strings if the value is empty', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = { name: '' };
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, !');
-  //   });
+    it('should replace placeholders with empty strings if the value is empty', () => {
+      const template = 'Hello, __name__!';
+      const replacements = { name: '' };
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, !');
+    });
 
-  //   it('should leave placeholder alone if replacements are empty', () => {
-  //     const template = 'Hello, __name__!';
-  //     const replacements = {};
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, __name__!');
-  //   });
+    it('should leave placeholder alone if replacements are empty', () => {
+      const template = 'Hello, __name__!';
+      const replacements = {};
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, __name__!');
+    });
 
-  //   it('should leave template alone if there are no placeholders', () => {
-  //     const template = 'Hello, name!';
-  //     const replacements = {};
-  //     const result = pullCraft.replacePlaceholders(template, replacements);
-  //     expect(result).to.equal('Hello, name!');
-  //   });
-  // });
+    it('should leave template alone if there are no placeholders', () => {
+      const template = 'Hello, name!';
+      const replacements = {};
+      const result = pullCraft.replacePlaceholders(template, replacements);
+      expect(result).to.equal('Hello, name!');
+    });
+  });
 
   describe('openUrl', () => {
     let platformStub: sinon.SinonStub;
@@ -144,53 +142,57 @@ describe('PullCraft', () => {
       platformStub = sinon.stub(process, 'platform');
     });
 
-    // it('should throw an error when URL is not provided', async () => {
-    //   await expect(pullCraft.openUrl('')).to.be.rejectedWith('Error: URL is required');
-    //   expect(consoleErrorStub.calledWith('Error: Please provide a value for the argument.')).to.equal(true);
-    // });
+    afterEach(() => {
+      platformStub.restore();
+    });
 
-    // it('should open URL on Linux', async () => {
-    //   platformStub.value('linux');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('xdg-open "https://example.com"')).to.equal(true);
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on linux')).to.equal(true);
-    // });
+    it('should throw an error when URL is not provided', async () => {
+      await expect(pullCraft.openUrl('')).to.be.rejectedWith('Error: URL is required');
+      expect(consoleErrorStub.calledWith('Error: Please provide a value for the argument.')).to.equal(true);
+    });
 
-    // it('should open URL on macOS', async () => {
-    //   platformStub.value('darwin');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('open "https://example.com"')).to.equal(true);
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on darwin')).to.equal(true);
-    // });
+    it('should open URL on Linux', async () => {
+      platformStub.value('linux');
+      await pullCraft.openUrl('https://example.com');
+      expect(execStub.calledWith('xdg-open "https://example.com"')).to.equal(true);
+      expect(consoleLogStub.calledWith('Opening URL: https://example.com on linux')).to.equal(true);
+    });
 
-    // it('should open URL on Windows', async () => {
-    //   platformStub.value('win32');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(execStub.calledWith('start "https://example.com"')).to.equal(true);
-    //   expect(consoleLogStub.calledWith('Opening URL: https://example.com on win32')).to.equal(true);
-    // });
+    it('should open URL on macOS', async () => {
+      platformStub.value('darwin');
+      await pullCraft.openUrl('https://example.com');
+      expect(execStub.calledWith('open "https://example.com"')).to.equal(true);
+      expect(consoleLogStub.calledWith('Opening URL: https://example.com on darwin')).to.equal(true);
+    });
 
-    // it('should log error for unsupported OS', async () => {
-    //   platformStub.value('freebsd');
-    //   await pullCraft.openUrl('https://example.com');
-    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
-    // });
+    it('should open URL on Windows', async () => {
+      platformStub.value('win32');
+      await pullCraft.openUrl('https://example.com');
+      expect(execStub.calledWith('start "https://example.com"')).to.equal(true);
+      expect(consoleLogStub.calledWith('Opening URL: https://example.com on win32')).to.equal(true);
+    });
 
-    // it('should not open URL if openPr is false', async () => {
-    //   pullCraft.openPr = false;
-    //   await pullCraft.openUrl('http://example.com');
-    //   expect(execStub.called).to.be.false;
-    // });
+    it('should log error for unsupported OS', async () => {
+      platformStub.value('freebsd');
+      await pullCraft.openUrl('https://example.com');
+      expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
+    });
 
-    // it('should handle unsupported OS', async () => {
-    //   const originalPlatform = process.platform;
-    //   Object.defineProperty(process, 'platform', { value: 'unsupported' });
+    it('should not open URL if openPr is false', async () => {
+      pullCraft.openPr = false;
+      await pullCraft.openUrl('http://example.com');
+      expect(execStub.called).to.equal(false);
+    });
 
-    //   await pullCraft.openUrl('http://example.com');
+    it('should handle unsupported OS', async () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', { value: 'unsupported' });
 
-    //   expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
-    //   Object.defineProperty(process, 'platform', { value: originalPlatform });
-    // });
+      await pullCraft.openUrl('http://example.com');
+
+      expect(consoleErrorStub.calledWith('Unsupported OS')).to.equal(true);
+      Object.defineProperty(process, 'platform', { value: originalPlatform });
+    });
 
     it('should handle error when opening URL', async () => {
       execStub.throws(new Error('Failed to open URL'));
