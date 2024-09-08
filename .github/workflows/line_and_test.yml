@@ -17,9 +17,12 @@ jobs:
     name: 'Node.js v${{ matrix.node }}'
     runs-on: ubuntu-latest
     # if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.head_ref == 'main' ||  (github.event_name == 'pull_request' && startsWith(github.head_ref,'update-dependencies-') && github.base_ref == 'main')
-    
-    if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'main'
 
+    if: |
+      (github.event_name == 'push' && !contains(fromJson('["main", "beta", "alpha"]'), github.ref_name)) ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'workflow_call'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
