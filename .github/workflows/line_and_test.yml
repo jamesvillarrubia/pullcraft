@@ -13,7 +13,7 @@ on:
   #     - main # only works on PRs with base_ref=main and follows limits below
   workflow_dispatch: # allows manual trigger
   workflow_call:
-  pull_request: # runs on all pull requests
+  # pull_request: # runs on all pull requests
   push:
     branches-ignore:
       - main
