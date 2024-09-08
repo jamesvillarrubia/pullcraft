@@ -7,12 +7,12 @@ on:
       - main
       - beta
       - alpha
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - beta
-      - alpha
+  # pull_request:
+  #   types: [closed]
+  #   branches:
+  #     - main
+  #     - beta
+  #     - alpha
 
 jobs:
   lint_and_test:
@@ -21,8 +21,7 @@ jobs:
   release:
     needs: lint_and_test
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -56,8 +55,7 @@ jobs:
   prerelease:
     needs: lint_and_test
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha')) ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && (github.event.pull_request.base.ref == 'beta' || github.event.pull_request.base.ref == 'alpha'))
+      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
     name: PreRelease
     runs-on: ubuntu-latest
     env:
