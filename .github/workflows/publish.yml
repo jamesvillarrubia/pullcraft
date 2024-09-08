@@ -9,6 +9,7 @@ on:
       - alpha
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   pull_request:
 <<<<<<< HEAD
 =======
@@ -60,6 +61,14 @@ jobs:
     # needs: test
 >>>>>>> 75f47b1 (tweak)
 =======
+=======
+  # pull_request:
+  #   types: [closed]
+  #   branches:
+  #     - main
+  #     - beta
+  #     - alpha
+>>>>>>> 5e0b1c9 (tweak)
 
 jobs:
   lint_and_test:
@@ -68,9 +77,13 @@ jobs:
   release:
     needs: lint_and_test
     if: |
+<<<<<<< HEAD
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
 >>>>>>> c302bb0 (tweak)
+=======
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+>>>>>>> 5e0b1c9 (tweak)
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -124,9 +137,13 @@ jobs:
 =======
     needs: lint_and_test
     if: |
+<<<<<<< HEAD
       (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha')) ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true && (github.event.pull_request.base.ref == 'beta' || github.event.pull_request.base.ref == 'alpha'))
 >>>>>>> c302bb0 (tweak)
+=======
+      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
+>>>>>>> 5e0b1c9 (tweak)
     name: PreRelease
     runs-on: ubuntu-latest
     env:
