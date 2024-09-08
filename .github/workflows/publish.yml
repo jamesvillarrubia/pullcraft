@@ -9,9 +9,16 @@ on:
       - alpha
 
 jobs:
-  # test:
-  #   if: github.ref_name == 'main'
-  #   uses: ./.github/workflows/line_and_test.yml
+  test:
+    name: 'Node.js v${{ matrix.node }}'
+    strategy:
+      matrix:
+        node:
+          - 18
+          - 20
+          - 22
+    if: github.ref_name == 'main'
+    uses: ./.github/workflows/line_and_test.yml
   release:
     # needs: test
     name: Release
