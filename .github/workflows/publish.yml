@@ -10,6 +10,7 @@ on:
 
 jobs:
   test:
+    if: github.ref_name == 'main'
     uses: ./.github/workflows/line_and_test.yml
   release:
     needs: test
