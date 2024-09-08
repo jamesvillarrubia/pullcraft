@@ -8,11 +8,16 @@ on:
       - beta
       - alpha
   pull_request:
+<<<<<<< HEAD
     types: [closed]
     branches:
       - main
       - beta
       - alpha
+=======
+    branches:
+      - main # only works on PRs with base_ref=main and follows limits below
+>>>>>>> 73f2099 (tweak)
 
 jobs:
   lint_and_test:
