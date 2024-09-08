@@ -56,9 +56,13 @@ jobs:
       - run: npx release-it --ci
 
   prerelease:
+<<<<<<< HEAD
     needs: lint_and_test
     if: |
       (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
+=======
+    # needs: test
+>>>>>>> 4a38760 (tweak)
     name: PreRelease
     runs-on: ubuntu-latest
     env:
