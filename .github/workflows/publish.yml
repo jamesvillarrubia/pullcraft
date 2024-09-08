@@ -7,13 +7,15 @@ on:
       - main
       - beta
       - alpha
-  pull_request:
-    branches:
-      - main # only works on PRs with base_ref=main and follows limits below
+  # pull_request:
+  #   branches:
+  #     - main # only works on PRs with base_ref=main and follows limits below
 
 jobs:
   test:
+    name: Release Test
     uses: ./.github/workflows/line_and_test.yml#test
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
   release:
     needs: test
     name: Release
