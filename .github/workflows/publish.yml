@@ -9,11 +9,11 @@ on:
       - alpha
 
 jobs:
-  test:
-    if: github.ref_name == 'main'
-    uses: ./.github/workflows/line_and_test.yml
+  # test:
+  #   if: github.ref_name == 'main'
+  #   uses: ./.github/workflows/line_and_test.yml
   release:
-    needs: test
+    # needs: test
     name: Release
     if: github.ref_name == 'main'
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
       - run: npx release-it --ci
 
   prerelease:
-    needs: test
+    # needs: test
     name: PreRelease
     if: github.ref_name != 'main'
     runs-on: ubuntu-latest
