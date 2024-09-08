@@ -23,7 +23,7 @@
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test"
   },
   "bin": {
-    "pullcraft": "dist/bin/pullcraft.js"
+    "pullcraft": "./dist/bin/pullcraft.js"
   },
   "devDependencies": {
     "@babel/register": "^7.24.6",
@@ -78,7 +78,6 @@
     "node-fetch": "^3.3.2",
     "open": "^10.1.0",
     "openai": "^4.58.1",
-    "pullcraft": "^0.3.4",
     "shelljs": "^0.8.5",
     "simple-git": "^3.26.0"
   },
