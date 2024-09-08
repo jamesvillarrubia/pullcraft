@@ -7,9 +7,6 @@ on:
       - main
       - beta
       - alpha
-  pull_request:
-    branches:
-      - main # only works on PRs with base_ref=main and follows limits below
 
 jobs:
   test:
