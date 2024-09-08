@@ -7,17 +7,23 @@ on:
       - main
       - beta
       - alpha
-  # pull_request:
-  #   branches:
-  #     - main # only works on PRs with base_ref=main and follows limits below
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - beta
+      - alpha
 
 jobs:
-  # test:
-  #   uses: ./.github/workflows/line_and_test.yml
+  lint_and_test:
+    uses: ./.github/workflows/line_and_test.yml
+
   release:
-    # needs: test
+    needs: lint_and_test
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
     name: Release
-    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,9 +54,11 @@ jobs:
       - run: npx release-it --ci
 
   prerelease:
-    # needs: test
+    needs: lint_and_test
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha')) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && (github.event.pull_request.base.ref == 'beta' || github.event.pull_request.base.ref == 'alpha'))
     name: PreRelease
-    if: github.ref_name != 'main'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
