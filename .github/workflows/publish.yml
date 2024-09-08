@@ -19,9 +19,13 @@ jobs:
     uses: ./.github/workflows/line_and_test.yml
 
   release:
+<<<<<<< HEAD
     needs: lint_and_test
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
+=======
+    needs: test
+>>>>>>> 69d178f (tweak)
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -57,12 +61,16 @@ jobs:
 
   prerelease:
 <<<<<<< HEAD
+<<<<<<< HEAD
     needs: lint_and_test
     if: |
       (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
 =======
     # needs: test
 >>>>>>> 4a38760 (tweak)
+=======
+    needs: test
+>>>>>>> 69d178f (tweak)
     name: PreRelease
     runs-on: ubuntu-latest
     env:
