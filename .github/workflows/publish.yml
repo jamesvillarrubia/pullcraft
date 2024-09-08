@@ -7,18 +7,13 @@ on:
       - main
       - beta
       - alpha
+  pull_request:
+    branches:
+      - main # only works on PRs with base_ref=main and follows limits below
 
 jobs:
   test:
-    name: 'Node.js v${{ matrix.node }}'
-    strategy:
-      matrix:
-        node:
-          - 18
-          - 20
-          - 22
-    if: github.ref_name == 'main'
-    uses: ./.github/workflows/line_and_test.yml
+    uses: ./.github/workflows/line_and_test.yml#test
   release:
     # needs: test
     name: Release
