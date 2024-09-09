@@ -35,7 +35,7 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts
           path: coverage
@@ -73,7 +73,7 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts
           path: coverage
