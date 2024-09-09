@@ -48,6 +48,6 @@ jobs:
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-artifacts
+          name: coverage-artifacts-node-${{ matrix.node }}
           path: coverage/
       - run: ls -la

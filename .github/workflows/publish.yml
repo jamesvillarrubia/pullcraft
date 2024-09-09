@@ -75,8 +75,8 @@ jobs:
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          name: coverage-artifacts
-          path: coverage
+          name: coverage-artifacts-node-22
+          path: coverage/
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
