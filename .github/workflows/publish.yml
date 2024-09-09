@@ -7,12 +7,7 @@ on:
       - main
       - beta
       - alpha
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - beta
-      - alpha
+
 jobs:
   lint_and_test:
     uses: ./.github/workflows/line_and_test.yml
