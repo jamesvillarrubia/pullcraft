@@ -7,83 +7,22 @@ on:
       - main
       - beta
       - alpha
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   pull_request:
-<<<<<<< HEAD
-=======
-  pull_request:
->>>>>>> c302bb0 (tweak)
     types: [closed]
     branches:
       - main
       - beta
       - alpha
-<<<<<<< HEAD
-=======
-    branches:
-      - main # only works on PRs with base_ref=main and follows limits below
->>>>>>> 73f2099 (tweak)
-
 jobs:
   lint_and_test:
     uses: ./.github/workflows/line_and_test.yml
-
-=======
-  # pull_request:
-  #   branches:
-  #     - main # only works on PRs with base_ref=main and follows limits below
-
-jobs:
-<<<<<<< HEAD
-  test:
-<<<<<<< HEAD
-    name: Release Test
-    uses: ./.github/workflows/line_and_test.yml#test
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
->>>>>>> 2be5c7c (tweak)
-=======
-    uses: ./.github/workflows/line_and_test.yml
->>>>>>> a4a4ca1 (tweak)
-  release:
-<<<<<<< HEAD
-    needs: lint_and_test
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
-=======
-    needs: test
->>>>>>> 69d178f (tweak)
-=======
-  # test:
-  #   uses: ./.github/workflows/line_and_test.yml
-  release:
-    # needs: test
->>>>>>> 75f47b1 (tweak)
-=======
-=======
-  # pull_request:
-  #   types: [closed]
-  #   branches:
-  #     - main
-  #     - beta
-  #     - alpha
->>>>>>> 5e0b1c9 (tweak)
-
-jobs:
-  lint_and_test:
-    uses: ./.github/workflows/line_and_test.yml
-
+ 
   release:
     needs: lint_and_test
     if: |
-<<<<<<< HEAD
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
->>>>>>> c302bb0 (tweak)
-=======
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
->>>>>>> 5e0b1c9 (tweak)
+
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -118,32 +57,10 @@ jobs:
       - run: npx release-it --ci
 
   prerelease:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     needs: lint_and_test
     if: |
       (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
-=======
-    # needs: test
->>>>>>> 4a38760 (tweak)
-=======
-    needs: test
->>>>>>> 69d178f (tweak)
-=======
-    # needs: test
->>>>>>> 75f47b1 (tweak)
-=======
-    needs: lint_and_test
-    if: |
-<<<<<<< HEAD
-      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha')) ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && (github.event.pull_request.base.ref == 'beta' || github.event.pull_request.base.ref == 'alpha'))
->>>>>>> c302bb0 (tweak)
-=======
-      (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
->>>>>>> 5e0b1c9 (tweak)
+
     name: PreRelease
     runs-on: ubuntu-latest
     env:
