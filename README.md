@@ -11,7 +11,7 @@
 [![Dependency Status](https://img.shields.io/librariesio/release/NPM/pullcraft)]()
 [![Node.js Version](https://img.shields.io/node/v/pullcraft.svg)](https://nodejs.org/en/)
 
-PullCraft is a powerful CLI tool and library for automating the creation and management of GitHub pull requests. It uses AI to generate meaningful PR titles and descriptions based on your code changes.
+PullCraft is a simple but powerful CLI tool for automating the creation and updating of GitHub pull requests. It creates diffs based on your code changes and a base or specified branch, then uses generative AI to create meaningful PR titles and descriptions.  It then creates the PR for you and opens the PR in the browser for final review.  You can provide hints, templates, and other options to customize the PR creation process to your needs.
 
 ## Table of Contents
 - [Features](#features)
@@ -82,57 +82,61 @@ npm install -g pullcraft
 
 PullCraft is primarily used as a command-line tool. Here are some common usage scenarios:
 
-1. Basic usage (create a PR from current branch to main):
+1. Basic usage (create a PR from current branch to the default base branch):
    ```bash
-   pullcraft main
+   pullcraft
    ```
 
 2. Specify both base and compare branches:
    ```bash
+   pullcraft main
+   ```
+3. Specify both base and compare branches:
+   ```bash
    pullcraft main feature-branch
    ```
 
-3. Use custom file exclusions:
+4. Use custom file exclusions:
    ```bash
    pullcraft main --exclusions "*.md,package-lock.json"
    ```
 
-4. Open the PR in the browser after creation:
+5. Open the PR in the browser after creation:
    ```bash
    pullcraft main --open-pr
    ```
 
-5. Use a specific GitHub strategy:
+6. Use a specific GitHub strategy:
    ```bash
    pullcraft main --github-strategy octokit
    ```
 
-6. Provide a hint for the AI:
+7. Provide a hint for the AI:
    ```bash
    pullcraft main --hint "This PR updates the user authentication system"
    ```
 
-7. Use custom templates:
+8. Use custom templates:
    ```bash
    pullcraft main --title-template "feat: {{title}}" --description-template "## Changes\n\n{{description}}"
    ```
 
-8. Set a custom diff threshold:
+9. Set a custom diff threshold:
    ```bash
    pullcraft main --diff-threshold 600
    ```
 
-9. Use a different OpenAI model:
+10. Use a different OpenAI model:
    ```bash
    pullcraft main --model gpt-4
    ```
 
-10. Dump the diff to a file for review:
+11. Dump the diff to a file for review:
     ```bash
     pullcraft main --dumpTo diff.txt
     ```
 
-11. Combine multiple options:
+12. Combine multiple options:
     ```bash
     pullcraft main feature-branch --open-pr --exclusions "*.md" --hint "Bug fix for login system" --diff-threshold 500
     ```
@@ -160,7 +164,7 @@ pullCraft.createPr('main', 'feature-branch');
 
 ## Configuration Options and CLI Flags
 
-PullCraft can be configured using a `.pullcraftrc` file, environment variables, or command-line options. The configuration is resolved in the following order:
+PullCraft can be configured using a `.pullcraftrc` file, environment variables, or command-line options.  The config file is ingested via [cosmiconfig](https://github.com/davidtheclark/cosmiconfig), so it's location and format is quite flexible. The configuration is resolved in the following order:
 
 1. Command-line options
 2. Configuration file
@@ -220,9 +224,9 @@ This table provides a comprehensive list of all CLI options and flags, including
 
 ## Template Placeholders
 
-PullCraft uses a placeholder system in its title and body templates to dynamically insert information. The default placeholder pattern is `__KEY__`, where `KEY` is replaced with the actual placeholder name.
+PullCraft uses a placeholder system in its title and body templates to dynamically insert information from the git repository and the diff. The default placeholder pattern is `__KEY__`, where `KEY` is replaced with the actual placeholder name.
 
-### Available Placeholders
+### Available Default Placeholders
 
 - `__owner__`: The owner of the repository
 - `__repo__`: The name of the repository
@@ -231,16 +235,18 @@ PullCraft uses a placeholder system in its title and body templates to dynamical
 
 ### Using Placeholders in Templates
 
-You can use these placeholders in your title and body templates. For example:
-
+You can use these placeholders in your title and body templates. For example, the title template: is
+```javascript
+export const titleTemplate = '<:build,chore,ci,docs,feat,fix,perf,refactor,style,test>: <TITLE GOES HERE>\n Example: "fix: Adds a missing semicolon"';
+```
+But this can be overridden by the command line option.  For example, you can use:
 ```bash
-pullcraft main --title-template "feat: __baseBranch__ -> __compareBranch__: __title__" --body-template "## Changes\n\n__description__"
+pullcraft main --title-template '__baseBranch__ -> __compareBranch__ : <TITLE GOES HERE>\n Example: "main -> ci/add-colon : Adds a missing semicolon"';
 ```
 
 In this example:
-- `__repo__` will be replaced with the actual repository name
-- `__KEY_FEATURE__` and `__DESCRIPTION__` are custom placeholders that will be filled by the AI
 - `__compareBranch__` and `__baseBranch__` will be replaced with the actual branch names
+- `<TITLE GOES HERE>` is simply instructions for the AI on where to put the title and is not a strict placeholder.
 
 ### Custom Placeholders
 
@@ -293,7 +299,7 @@ Here are some examples of how to use PullCraft with various options and scenario
 
 7. Use custom templates:
    ```bash
-   pullcraft main --title-template "feat: {{title}}" --description-template "## Changes\n\n{{description}}"
+   pullcraft main --description-template "## Changes\n\n{{description}}"
    ```
 
 8. Set a custom diff threshold:
