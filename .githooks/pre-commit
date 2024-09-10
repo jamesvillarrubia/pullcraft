@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Pre-commit Hook
+# This script prevents direct commits to protected branches (main and develop).
+
+check_protected_branch() {
+    local branch_name=$(git rev-parse --abbrev-ref HEAD)
+    local protected_branches=("main" "develop")
+
+    for protected_branch in "${protected_branches[@]}"; do
+        if [[ "$branch_name" == "$protected_branch" ]]; then
+            echo "Error: Direct commits to $protected_branch are not allowed."
+            echo "Please create a feature branch and submit a pull request instead."
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+# Main execution
+if ! check_protected_branch; then
+    exit 1
+fi
+
+echo "Branch check passed. Proceeding with commit."
