@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { GitHubClient, OctokitClient, GhClient } from '../src/githubClient';
+import { GitHubClient, OctokitClient, GhClient } from '../src/githubClient.js';
 import childProcess from 'child_process';
 
 // chai.use(chaiAsPromised);

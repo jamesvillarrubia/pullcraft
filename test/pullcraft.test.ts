@@ -4,7 +4,7 @@ import { describe, it } from 'mocha';
 import nock from 'nock'; // Change this line
 
 import * as sinon from 'sinon';
-import PullCraft from '../src/index';
+import PullCraft from '../src/index.js';
 import childProcess from 'child_process';
 
 import fs from 'fs';
@@ -627,12 +627,12 @@ describe('PullCraft', () => {
     it('should handle error when differ returns undefined', async () => {
       const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
       const getRepoInfoStub = sinon.stub(pullCraft, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
-      const differStub = sinon.stub(pullCraft, 'differ').resolves(undefined);
+      const differStub = sinon.stub(pullCraft, 'differ').resolves({ response: undefined, exit: false });
 
       await pullCraft.createPr('develop');
 
       expect(consoleErrorStub.calledOnce).to.equal(true);
-      expect(consoleErrorStub.firstCall.args[0]).to.include('Cannot destructure');
+      expect(consoleErrorStub.firstCall.args[0]).to.include('Error: Response could not be retrieved.');
     });
     it('should handle case when getRepoInfo returns null', async () => {
       // @ts-expect-error - testing
@@ -651,6 +651,67 @@ describe('PullCraft', () => {
       const result = await pullCraft.createPr();
 
       expect(result).to.equal(undefined);
+    });
+
+    it('should update an existing PR if one exists', async () => {
+      const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
+      const getRepoInfoStub = sinon.stub(pullCraft, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
+      const differStub = sinon.stub(pullCraft, 'differ').resolves({
+        response: JSON.stringify({ title: 'Test PR', body: 'Test body' }),
+        exit: false
+      });
+
+      listPullsStub.resolves([{ number: 123 }]);
+      updatePullStub.resolves();
+      const openUrlStub = sinon.stub(pullCraft, 'openUrl').resolves();
+
+      await pullCraft.createPr('develop', 'feature-branch');
+
+      expect(listPullsStub.calledOnce).to.equal(true);
+      expect(updatePullStub.calledOnce).to.equal(true);
+      expect(updatePullStub.firstCall.args[0]).to.deep.equal({
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+        title: 'Test PR',
+        body: 'Test body'
+      });
+      expect(openUrlStub.calledOnce).to.equal(true);
+      expect(openUrlStub.firstCall.args[0]).to.equal('https://github.com/owner/repo/pull/123');
+      expect(consoleLogStub.calledWith('Updating existing PR #123...')).to.equal(true);
+    });
+
+    it('should create a new PR if none exists', async () => {
+      const gitStub = sinon.stub(pullCraft.git, 'revparse').resolves('feature-branch\n');
+      const getRepoInfoStub = sinon.stub(pullCraft, 'getRepoInfo').resolves({ owner: 'owner', repo: 'repo' });
+      const differStub = sinon.stub(pullCraft, 'differ').resolves({
+        response: JSON.stringify({ title: 'Test PR', body: 'Test body' }),
+        exit: false
+      });
+
+      // Restore and re-stub listPulls
+      listPullsStub.resolves([]);
+
+      createPullStub.resolves({
+        data: { html_url: 'https://github.com/owner/repo/pull/456' }
+      });
+      const openUrlStub = sinon.stub(pullCraft, 'openUrl').resolves();
+
+      await pullCraft.createPr('develop', 'feature-branch');
+
+      expect(listPullsStub.calledOnce).to.equal(true);
+      expect(createPullStub.calledOnce).to.equal(true);
+      expect(createPullStub.firstCall.args[0]).to.deep.equal({
+        owner: 'owner',
+        repo: 'repo',
+        title: 'Test PR',
+        body: 'Test body',
+        base: 'develop',
+        head: 'feature-branch'
+      });
+      expect(openUrlStub.calledOnce).to.equal(true);
+      expect(openUrlStub.firstCall.args[0]).to.equal('https://github.com/owner/repo/pull/456');
+      expect(consoleLogStub.calledWith('Creating a new PR...')).to.equal(true);
     });
   });
 
