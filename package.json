@@ -20,7 +20,8 @@
     "test:dev": "echo '\\033c' && npm run lint; npm run mocha:dev",
     "coverage2": "nyc npm test",
     "release": "release-it --dry-run --ci --config .release-it.js",
-    "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test"
+    "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
+    "postinstall": "npx shx cp -n .githooks/* .git/hooks/"
   },
   "bin": {
     "pullcraft": "./dist/bin/pullcraft.js"

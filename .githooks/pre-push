@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Pre-push Hook
+# This script performs two checks:
+# 1. Ensures the branch name follows the conventional commit prefix pattern
+# 2. Verifies that the branch is based on the latest main or develop
+
+# Function to check branch naming convention
+check_branch_name() {
+    echo "Checking branch naming convention..."
+    local branch_name=$(git rev-parse --abbrev-ref HEAD)
+    local valid_prefixes="build|chore|ci|docs|feat|fix|perf|refactor|style|test"
+    if [[ ! $branch_name =~ ^($valid_prefixes)/ ]]; then
+        echo "Error: Branch name does not follow the conventional commit prefix pattern."
+        echo "Valid prefixes are: $valid_prefixes"
+        return 1
+    fi
+    echo "Branch naming convention check passed."
+    return 0
+}
+
+# Function to check if branch is up-to-date with main or develop
+check_branch_up_to_date() {
+    echo "Checking if branch is up-to-date with main or develop..."
+
+    # Fetch the latest changes from the remote
+    git fetch origin
+
+    # Get the latest commit hashes from the remote main and develop
+    local latest_main=$(git rev-parse origin/main)
+    local latest_develop=$(git rev-parse origin/develop)
+
+    # Get the common ancestor between the current branch and main/develop
+    local base_main=$(git merge-base HEAD origin/main)
+    local base_develop=$(git merge-base HEAD origin/develop)
+
+    # Check if the branch is based off the latest main or develop
+    if [ "$base_main" != "$latest_main" ] && [ "$base_develop" != "$latest_develop" ]; then
+        echo "Error: Your branch is not based off the latest main or develop."
+        echo "Please rebase your branch onto the latest main or develop before pushing."
+        return 1
+    fi
+
+    echo "Branch is up-to-date with main or develop."
+    return 0
+}
+
+# Main execution
+if ! check_branch_name; then
+    exit 1
+fi
+
+if ! check_branch_up_to_date; then
+    exit 1
+fi
+
+echo "All checks passed. Proceeding with push."
