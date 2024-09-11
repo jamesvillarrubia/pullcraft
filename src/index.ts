@@ -1,4 +1,4 @@
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { systemPrompt, titleTemplate, bodyTemplate, hintPrompt } from './prompt.js';
 import { cosmiconfigSync } from 'cosmiconfig';
 import OpenAI from 'openai';
