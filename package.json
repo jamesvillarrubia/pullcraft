@@ -12,21 +12,16 @@
   "scripts": {
     "mocha": "mocha --config .mocharc.json",
     "mocha:dev": "mocha --config .mocharc.json --watch",
-
-    
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-
     "build": "npm run build:cjs; npm run build:esm; npm run build:sea",
     "build:cjs": "rm -rf ./dist/cjs; npx tsc -p tsconfig.cjs.json; chmod +x ./dist/cjs/bin/pullcraft.js",
     "build:esm": "rm -rf ./dist/esm; npx tsc -p tsconfig.esm.json; chmod +x ./dist/esm/bin/pullcraft.js",
     "build:sea": "rm ./build/bundle.j; rm ./build/pullcraft*; node build/build.js; chmod +x ./build/pullcraft",
-    
     "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha;",
     "test:dev": "echo '\\033c' && npm run lint; npm run mocha:dev",
     "test:sea": "npm run build:sea && mocha --spec \"./build/build.test.js\" --no-config --require ts-node/register",
-
     "coverage2": "nyc npm test",
     "release": "release-it --dry-run --ci --config .release-it.cjs",
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
@@ -62,8 +57,9 @@
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.5.4",
     "@types/sinon": "^17.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "@typescript-eslint/typescript-estree": "^8.5.0",
     "c8": "^10.1.2",
     "chai": "^5.1.1",
     "chai-as-promised": "^8.0.0",
@@ -82,7 +78,8 @@
     "sinon": "^18.0.0",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "eslint-config-standard": "^17.1.0"
   },
   "overrides": {
     "inflight": "^2.0.0",
@@ -96,7 +93,6 @@
     "commander": "^12.1.0",
     "cosmiconfig": "^9.0.0",
     "dotenv": "^16.4.5",
-    "eslint-config-standard": "^17.1.0",
     "openai": "^4.58.1",
     "simple-git": "^3.26.0"
   },

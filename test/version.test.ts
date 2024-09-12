@@ -1,5 +1,6 @@
 import { describe, it } from 'mocha';
 import chaiAsPromised from 'chai-as-promised';
+import * as chai from 'chai';
 import { expect } from 'chai';
 import { VERSION } from '../src/version';
 chai.use(chaiAsPromised);
