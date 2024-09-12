@@ -16,30 +16,8 @@ module.exports = {
     "skipChecks": true
   },
   "hooks": {
-    'before:release': [
-      'npm run build',
-      async () => {
-        const fs = require('fs').promises;
-        const path = require('path');
-        const version = '${version}'; // release-it will replace this
-
-        // Update version in src/version.ts
-        const versionPath = path.join(__dirname, 'src', 'version.ts');
-        let versionContent = await fs.readFile(versionPath, 'utf8');
-        versionContent = versionContent.replace(/VERSION = '.*?'/, `VERSION = '${version}'`);
-        await fs.writeFile(versionPath, versionContent);
-
-        // Update version in README.md
-        const readmePath = path.join(__dirname, 'README.md');
-        let readmeContent = await fs.readFile(readmePath, 'utf8');
-        readmeContent = readmeContent.replace(
-          /https:\/\/github\.com\/jamesvillarrubia\/pullcraft\/releases\/download\/v[\d.]+\/pullcraft/g,
-          `https://github.com/jamesvillarrubia/pullcraft/releases/download/v${version}/pullcraft`
-        );
-        await fs.writeFile(readmePath, readmeContent);
-      },
-    ],
-    'after:release': 'npm run build', // Rebuild with the new version
+    "before:release": "./.release-it-version.sh ${version}",
+    "after:release": "npm run build"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
