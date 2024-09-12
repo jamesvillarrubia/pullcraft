@@ -11,6 +11,7 @@ module.exports = {
     "assets": ["./build/pullcraft"]
   },
   "npm": {
+    "ignoreVersion": true,
     "publish": true
   },
   "hooks": {
