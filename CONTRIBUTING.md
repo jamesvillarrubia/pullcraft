@@ -29,7 +29,7 @@ We're excited that you're interested in contributing to PullCraft! This document
 ## Pull Request Guidelines
 
 - Keep PRs focused on a single feature or bug fix.
-- Include a clear description of the changes.
+- Include a clear description of the changes.  Add documentation if needed.
 - Reference any related issues in the PR description.
 - Be open to feedback and be willing to make changes if requested.
 
