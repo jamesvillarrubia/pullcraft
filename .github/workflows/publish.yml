@@ -13,26 +13,7 @@ jobs:
     uses: ./.github/workflows/line_and_test.yml
 
   build_packages:
-    needs: lint_and_test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run build --if-present
-      - name: Package application
-        run: npm run package
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pullcraft-${{ runner.os }}
-          path: dist/pullcraft*
-          if-no-files-found: error
+    uses: ./.github/workflows/bundle_sea.yml
 
   release:
     needs: [lint_and_test, build_packages]
@@ -58,7 +39,7 @@ jobs:
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
+          path: build
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -95,7 +76,7 @@ jobs:
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
+          path: build
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
