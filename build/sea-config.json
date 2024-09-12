@@ -1,0 +1,5 @@
+{
+  "main": "dist/bin/pullcraft.js",
+  "output": "build/pullcraft.blob",
+  "args": ["--experimental-sea-config", "--experimental-default-type=module"]
+}
