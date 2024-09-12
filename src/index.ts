@@ -1,8 +1,8 @@
 import { simpleGit } from 'simple-git';
 import { systemPrompt, titleTemplate, bodyTemplate, hintPrompt } from './prompt.js';
 import { cosmiconfigSync } from 'cosmiconfig';
-import OpenAI from 'openai';
-import cp, { ChildProcess, execSync, exec } from 'child_process';
+import { OpenAI } from 'openai';
+import cp, { ChildProcess } from 'child_process';
 import { GitHubClient, OctokitClient, GhClient } from './githubClient.js';
 import fs from 'fs';
 

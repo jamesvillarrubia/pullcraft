@@ -12,31 +12,20 @@
   "scripts": {
     "mocha": "mocha --config .mocharc.json",
     "mocha:dev": "mocha --config .mocharc.json --watch",
-
-    
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-
-    "build": "npm run build:cjs; npm run build:esm; npm run build:sea",
-    "build:cjs": "rm -rf ./dist/cjs; npx tsc -p tsconfig.cjs.json; chmod +x ./dist/cjs/bin/pullcraft.js",
-    "build:esm": "rm -rf ./dist/esm; npx tsc -p tsconfig.esm.json; chmod +x ./dist/esm/bin/pullcraft.js",
-    "build:sea": "rm ./build/bundle.j; rm ./build/pullcraft*; node build/build.js; chmod +x ./build/pullcraft",
-    
-    "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha;",
+    "build": "rm -rf ./dist; npx tsc; rm -rf ./dist/test; chmod +x ./dist/bin/pullcraft.js",
+    "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha",
     "test:dev": "echo '\\033c' && npm run lint; npm run mocha:dev",
-    "test:sea": "npm run build:sea && mocha --spec \"./build/build.test.js\" --no-config --require ts-node/register",
-
     "coverage2": "nyc npm test",
     "release": "release-it --dry-run --ci --config .release-it.js",
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
     "postinstall": "npx shx cp -n .githooks/* .git/hooks/",
-    "package2": "nexe dist/bin/pullcraft.js --resource './dist/**/*' --build -t mac-x64-14.15.3,linux-x64-14.15.3,windows-x64-14.15.3 -o build/pullcraft",
-    "create-installers": "cp ./src/bin/install.sh build/ && cp ./src/bin/install.bat build/",
-    "package": "node --experimental-sea-config ./build/sea-config.json --experimental-default-type=module  && cp $(command -v node) build/pullcraft && npx postject build/pullcraft NODE_SEA_BLOB build/pullcraft.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --macho-segment-name NODE_SEA"
+    "package": "nexe dist/bin/pullcraft.js -o build/pullcraft --verbose"
   },
   "bin": {
-    "pullcraft": "./dist/esm/bin/pullcraft.js"
+    "pullcraft": "./dist/bin/pullcraft.js"
   },
   "pkg": {
     "scripts": "dist/**/*.js",
@@ -59,30 +48,38 @@
     "@types/chai": "^4.3.19",
     "@types/chai-as-promised": "^8.0.0",
     "@types/eslint__js": "^8.42.3",
+    "@types/jest": "^29.5.12",
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.5.4",
+    "@types/proxyquire": "^1.3.31",
     "@types/sinon": "^17.0.3",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
     "@typescript-eslint/parser": "^8.4.0",
+    "@vitest/coverage-v8": "^2.0.5",
     "c8": "^10.1.2",
     "chai": "^5.1.1",
     "chai-as-promised": "^8.0.0",
     "conventional-changelog-angular": "^8.0.0",
-    "esbuild": "^0.23.1",
     "eslint": "^8.56.0",
-    "eslint-plugin-import": "^2.30.0",
+    "eslint-config-standard": "^17.1.0",
+    "esm": "^3.2.25",
+    "globals": "^15.9.0",
     "mocha": "^10.7.3",
     "nexe": "^3.3.7",
     "nock": "^13.5.5",
-    "postject": "^1.0.0-alpha.6",
+    "pkg": "^5.8.1",
     "prettier": "^3.3.3",
     "proxyquire": "^2.1.3",
     "release-it": "^17.6.0",
     "rimraf": "^6.0.1",
     "sinon": "^18.0.0",
     "source-map-support": "^0.5.21",
+    "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.4.0",
+    "vitest": "^2.0.5"
   },
   "overrides": {
     "inflight": "^2.0.0",
@@ -96,8 +93,10 @@
     "commander": "^12.1.0",
     "cosmiconfig": "^9.0.0",
     "dotenv": "^16.4.5",
-    "eslint-config-standard": "^17.1.0",
+    "node-fetch": "^3.3.2",
+    "open": "^10.1.0",
     "openai": "^4.58.1",
+    "shelljs": "^0.8.5",
     "simple-git": "^3.26.0"
   },
   "repository": {

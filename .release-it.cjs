@@ -5,7 +5,8 @@ module.exports = {
     "pushArgs": ["--tags"]
   },
   "github": {
-    "release": true
+    "release": true,
+    "assets": ["./build/pullcraft"]
   },
   "npm": {
     "ignoreVersion": true,
