@@ -11,9 +11,31 @@ on:
 jobs:
   lint_and_test:
     uses: ./.github/workflows/line_and_test.yml
- 
-  release:
+
+  build_packages:
     needs: lint_and_test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build --if-present
+      - name: Package application
+        run: npm run package
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pullcraft-${{ runner.os }}
+          path: dist/pullcraft*
+          if-no-files-found: error
+
+  release:
+    needs: [lint_and_test, build_packages]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Release
     runs-on: ubuntu-latest
@@ -33,13 +55,14 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
       - run: npm ci
-      - run: npm run build --if-present
-      # - name: Run tests and generate coverage
-      #   run: npm run coverage
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -49,7 +72,7 @@ jobs:
       - run: npx release-it --ci
 
   prerelease:
-    needs: lint_and_test
+    needs: [lint_and_test, build_packages]
     if: (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
     name: PreRelease
     runs-on: ubuntu-latest
@@ -69,13 +92,14 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
       - run: npm ci
-      - run: npm run build --if-present
-      # - name: Run tests and generate coverage
-      #   run: npm run coverage
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
