@@ -79,8 +79,12 @@
     "sinon": "^18.0.0",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
+<<<<<<< HEAD
     "typescript": "^5.5.4",
     "shx": "^0.3.4"
+=======
+    "typescript": "^5.5.4"
+>>>>>>> 9c361ba (updates build scripts)
   },
   "overrides": {
     "inflight": "^2.0.0",
