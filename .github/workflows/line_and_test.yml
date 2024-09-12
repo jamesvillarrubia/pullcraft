@@ -40,9 +40,9 @@ jobs:
             ${{ runner.os }}-node-v${{ matrix.node }}-
       - name: Install dependencies
         run: npm ci
-      - name: Run linters
+      - name: Run Linters
         run: npm run lint
-      - name: Run applicationtests
+      - name: Run application tests
         run: npm run coverage
       - name: Run SEA tests
         if: matrix.node == 20
