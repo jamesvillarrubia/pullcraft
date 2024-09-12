@@ -11,9 +11,12 @@ on:
 jobs:
   lint_and_test:
     uses: ./.github/workflows/line_and_test.yml
- 
+
+  build_packages:
+    uses: ./.github/workflows/bundle_sea.yml
+
   release:
-    needs: lint_and_test
+    needs: [lint_and_test, build_packages]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Release
     runs-on: ubuntu-latest
@@ -33,13 +36,14 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
       - run: npm ci
-      - run: npm run build --if-present
-      # - name: Run tests and generate coverage
-      #   run: npm run coverage
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -49,7 +53,7 @@ jobs:
       - run: npx release-it --ci
 
   prerelease:
-    needs: lint_and_test
+    needs: [lint_and_test, build_packages]
     if: (github.event_name == 'push' && (github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/alpha'))
     name: PreRelease
     runs-on: ubuntu-latest
@@ -69,13 +73,14 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
       - run: npm ci
-      - run: npm run build --if-present
-      # - name: Run tests and generate coverage
-      #   run: npm run coverage
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:

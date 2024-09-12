@@ -3,23 +3,14 @@
 INSTALL_DIR="/usr/local/bin"
 REPO="jamesvillarrubia/pullcraft"
 
-# Determine OS and architecture
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    OS="macos"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    OS="ubuntu"
-else
-    echo "Unsupported operating system: $OSTYPE"
-    exit 1
-fi
-
+# Determine system architecture
 ARCH=$(uname -m)
 case $ARCH in
     x86_64)
-        ARCH="x64"
+        BINARY_ARCH="x64"
         ;;
     arm64|aarch64)
-        ARCH="arm64"
+        BINARY_ARCH="arm64"
         ;;
     *)
         echo "Unsupported architecture: $ARCH"
@@ -36,13 +27,11 @@ if [ -z "$LATEST_VERSION" ]; then
 fi
 
 echo "Latest version: $LATEST_VERSION"
-echo "Detected OS: $OS, Architecture: $ARCH"
+echo "System architecture: $ARCH, downloading binary for $BINARY_ARCH"
 
 # Download the latest release
-BINARY_NAME="pullcraft-$OS"
-DOWNLOAD_URL="https://github.com/$REPO/releases/download/$LATEST_VERSION/$BINARY_NAME"
-echo "Downloading PullCraft from $DOWNLOAD_URL..."
-curl -L "$DOWNLOAD_URL" -o pullcraft
+echo "Downloading PullCraft..."
+curl -L "https://github.com/$REPO/releases/download/$LATEST_VERSION/pullcraft" -o pullcraft
 
 if [ $? -ne 0 ]; then
     echo "Failed to download PullCraft. Please check your internet connection and try again."
@@ -63,5 +52,17 @@ fi
 echo "PullCraft has been installed successfully in $INSTALL_DIR"
 echo "You can now use the 'pullcraft' command to run the application."
 
+# Update PATH if necessary
+if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> ~/.bashrc
+    echo "Please restart your terminal or run 'source ~/.bashrc' to update your PATH."
+fi
+
 # Verify the installation
-pullcraft --version
+echo "Verifying installation..."
+$INSTALL_DIR/pullcraft --version
+
+if [ $? -ne 0 ]; then
+    echo "Installation verification failed. Please check if the binary is compatible with your system."
+    exit 1
+fi
