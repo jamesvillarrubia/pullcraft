@@ -174,10 +174,10 @@ Example `.pullcraftrc` file:
 
 ```json
 {
-"baseDefault": "main",
-"openPr": true,
-"exclusions": [".md", "package-lock.json"],
-"githubStrategy": "gh"
+  "baseDefault": "main",
+  "openPr": true,
+  "exclusions": [".md", "package-lock.json"],
+  "githubStrategy": "gh"
 }
 ```
 
