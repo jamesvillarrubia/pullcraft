@@ -54,28 +54,43 @@ npm install -g pullcraft
 ```
 ### Option 2: Direct download (for non-Node.js users)
 
-1. Download the PullCraft executable:
-   ```bash
-   curl -LO https://github.com/jamesvillarrubia/pullcraft/releases/download/v0.4.0/pullcraft
-   ```
-   Note: Replace `v0.4.0` with the latest version number if necessary.
+#### Linux and macOS
 
-2. Make the downloaded file executable:
+1. Download and run the installation script:
    ```bash
-   chmod +x pullcraft
+   curl -O https://raw.githubusercontent.com/jamesvillarrubia/pullcraft/main/build/install.sh
+   sudo bash install.sh
    ```
 
-3. Move the executable to a directory in your PATH:
-   ```bash
-   sudo mv pullcraft /usr/local/bin/pullcraft
+This script will automatically:
+- Fetch the latest version of PullCraft
+- Download the executable
+- Make it executable
+- Move it to /usr/local/bin
+- Verify the installation
+
+If you encounter any issues, please check the error messages and ensure you have the necessary permissions.
+
+#### Windows
+
+1. Download the installation script:
+   ```
+   curl -O https://raw.githubusercontent.com/jamesvillarrubia/pullcraft/main/build/install.bat
    ```
 
-4. Verify the installation:
-   ```bash
-   pullcraft --version
-   ```
+2. Right-click on the downloaded `install.bat` file and select "Run as administrator".
 
-For more detailed installation instructions, see our [Installation Guide](INSTALL.md).
+This script will automatically:
+- Fetch the latest version of PullCraft
+- Download the executable
+- Create an installation directory
+- Move the executable to the installation directory
+- Add the installation directory to your PATH
+- Verify the installation
+
+After installation, restart your command prompt for the PATH changes to take effect.
+
+If you encounter any issues, please check the error messages and ensure you're running the script with administrator privileges.
 
 ## Quick Start
 
@@ -90,72 +105,13 @@ For more detailed installation instructions, see our [Installation Guide](INSTAL
      ```
    - Option 3: Use the `--api-key` option when running PullCraft:
      ```bash
-     plc main feature-branch --api-key your_api_key_here
+     pullcraft main feature-branch --api-key your_api_key_here
      ```
 
 2. Create a PR:
    ```bash
-   plc main feature-branch
-   ```
-
-## Usage
-
-### CLI Examples
-
-PullCraft is primarily used as a command-line tool. Here are some common usage scenarios:
-
-1. Basic usage (create a PR from current branch to the default base branch):
-   ```bash
-   plc
-   ```
-
-2. Specify both base and compare branches:
-   ```bash
-   plc main feature-branch
-   ```
-
-// ... (keep the rest of the CLI examples) ...
-
-### Library Usage
-
-// ... (keep existing content) ...
-
-// ... (keep the rest of the sections as they are) ...
-
-
-
-
-## Quick Start
-
-1. Install PullCraft:
-   ```bash
-   npm install -g pullcraft
-   ```
-
-2. Set up your OpenAI API key:
-   - Option 1: Create a `.env` file in your project root:
-     ```bash
-     OPENAI_API_KEY=your_api_key_here
-     ```
-   - Option 2: Set it as an environment variable in your shell:
-     ```bash
-     export OPENAI_API_KEY=your_api_key_here
-     ```
-   - Option 3: Use the `--api-key` option when running PullCraft:
-     ```bash
-     pullcraft main feature-branch --api-key your_api_key_here
-     ```
-
-3. Create a PR:
-   ```bash
    pullcraft main feature-branch
    ```
-
-## Installation
-
-```bash
-npm install -g pullcraft
-```
 
 ## Usage
 
@@ -168,10 +124,11 @@ PullCraft is primarily used as a command-line tool. Here are some common usage s
    pullcraft
    ```
 
-2. Specify both base and compare branches:
+2. Specify base branch:
    ```bash
    pullcraft main
    ```
+
 3. Specify both base and compare branches:
    ```bash
    pullcraft main feature-branch
@@ -208,9 +165,9 @@ PullCraft is primarily used as a command-line tool. Here are some common usage s
    ```
 
 10. Use a different OpenAI model:
-   ```bash
-   pullcraft main --model gpt-4
-   ```
+    ```bash
+    pullcraft main --model gpt-4
+    ```
 
 11. Dump the diff to a file for review:
     ```bash
@@ -343,67 +300,6 @@ pullcraft main --placeholder-pattern "{{KEY}}" --title-template "feat({{repo}}):
 ```
 
 This will use `{{KEY}}` as the placeholder pattern instead of `__KEY__`. This flexibility allows you to customize the templates to fit your project's conventions and needs.
-
-## Examples
-
-Here are some examples of how to use PullCraft with various options and scenarios:
-
-1. Basic usage:
-   ```bash
-   pullcraft main
-   ```
-
-2. Specify both base and compare branches:
-   ```bash
-   pullcraft main feature-branch
-   ```
-
-3. Use custom file exclusions:
-   ```bash
-   pullcraft main --exclusions "*.md,package-lock.json"
-   ```
-
-4. Open the PR in the browser after creation:
-   ```bash
-   pullcraft main --open-pr
-   ```
-
-5. Use a specific GitHub strategy:
-   ```bash
-   pullcraft main --github-strategy octokit
-   ```
-
-6. Provide a hint for the AI:
-   ```bash
-   pullcraft main --hint "This PR updates the user authentication system"
-   ```
-
-7. Use custom templates:
-   ```bash
-   pullcraft main --description-template "## Changes\n\n{{description}}"
-   ```
-
-8. Set a custom diff threshold:
-   ```bash
-   pullcraft main --diff-threshold 600
-   ```
-
-9. Use a different OpenAI model:
-   ```bash
-   pullcraft main --model gpt-4
-   ```
-
-10. Dump the diff to a file for review:
-    ```bash
-    pullcraft main --dumpTo diff.txt
-    ```
-
-11. Combine multiple options:
-    ```bash
-    pullcraft main feature-branch --open-pr --exclusions "*.md" --hint "Bug fix for login system" --diff-threshold 500
-    ```
-
-These examples demonstrate various use cases and options that PullCraft supports.
 
 ## Troubleshooting
 
