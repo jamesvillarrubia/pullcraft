@@ -1,8 +1,8 @@
 module.exports = {
-  "git":{
+  "git": {
     "requireCleanWorkingDir": false,
     "commit": true,
-    "pushArgs": ["--tags"],
+    "pushArgs": ["--follow-tags"],
     "commitArgs": ['-a'],
     "commitMessage": 'chore: release v${version} [skip ci]'
   },
@@ -11,13 +11,11 @@ module.exports = {
     "assets": ["./build/pullcraft"]
   },
   "npm": {
-    "ignoreVersion": true,
-    "publish": true,
-    "skipChecks": true
+    "publish": true
   },
   "hooks": {
-    "before:release": "./.release-it-version.sh ${version}",
-    "after:release": "npm run build"
+    "before:bump": "./.release-it-version.sh ${version}",
+    "after:bump": "npm run build",
   },
   "plugins": {
     "@release-it/conventional-changelog": {
