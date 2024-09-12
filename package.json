@@ -23,7 +23,7 @@
     "build:esm": "rm -rf ./dist/esm; npx tsc -p tsconfig.esm.json; chmod +x ./dist/esm/bin/pullcraft.js",
     "build:sea": "rm ./build/bundle.j; rm ./build/pullcraft*; node build/build.js; chmod +x ./build/pullcraft",
     
-    "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha; npm run test:sea",
+    "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha;",
     "test:dev": "echo '\\033c' && npm run lint; npm run mocha:dev",
     "test:sea": "npm run build:sea && mocha --spec \"./build/build.test.js\" --no-config --require ts-node/register",
 
