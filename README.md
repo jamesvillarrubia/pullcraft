@@ -39,19 +39,62 @@ PullCraft is a simple but powerful CLI tool for automating the creation and upda
 - Option to dump diffs to a file for manual review
 
 ## Prerequisites
-- Node.js v14 or higher
 - Git
 - A GitHub account
 - An OpenAI API key
 
-## Quick Start
+## Installation
 
-1. Install PullCraft:
+### Option 1: Using npm (for Node.js users)
+
+If you have Node.js installed, you can install PullCraft using npm:
+
+```bash
+npm install -g pullcraft
+```
+### Option 2: Direct download (for non-Node.js users)
+
+#### Linux and macOS
+
+1. Download and run the installation script:
    ```bash
-   npm install -g pullcraft
+   curl -O https://raw.githubusercontent.com/jamesvillarrubia/pullcraft/main/build/install.sh
+   sudo bash install.sh
    ```
 
-2. Set up your OpenAI API key:
+This script will automatically:
+- Fetch the latest version of PullCraft
+- Download the executable
+- Make it executable
+- Move it to /usr/local/bin
+- Verify the installation
+
+If you encounter any issues, please check the error messages and ensure you have the necessary permissions.
+
+#### Windows
+
+1. Download the installation script:
+   ```
+   curl -O https://raw.githubusercontent.com/jamesvillarrubia/pullcraft/main/build/install.bat
+   ```
+
+2. Right-click on the downloaded `install.bat` file and select "Run as administrator".
+
+This script will automatically:
+- Fetch the latest version of PullCraft
+- Download the executable
+- Create an installation directory
+- Move the executable to the installation directory
+- Add the installation directory to your PATH
+- Verify the installation
+
+After installation, restart your command prompt for the PATH changes to take effect.
+
+If you encounter any issues, please check the error messages and ensure you're running the script with administrator privileges.
+
+## Quick Start
+
+1. Set up your OpenAI API key:
    - Option 1: Create a `.env` file in your project root:
      ```bash
      OPENAI_API_KEY=your_api_key_here
@@ -65,16 +108,10 @@ PullCraft is a simple but powerful CLI tool for automating the creation and upda
      pullcraft main feature-branch --api-key your_api_key_here
      ```
 
-3. Create a PR:
+2. Create a PR:
    ```bash
    pullcraft main feature-branch
    ```
-
-## Installation
-
-```bash
-npm install -g pullcraft
-```
 
 ## Usage
 
@@ -87,10 +124,11 @@ PullCraft is primarily used as a command-line tool. Here are some common usage s
    pullcraft
    ```
 
-2. Specify both base and compare branches:
+2. Specify base branch:
    ```bash
    pullcraft main
    ```
+
 3. Specify both base and compare branches:
    ```bash
    pullcraft main feature-branch
@@ -127,9 +165,9 @@ PullCraft is primarily used as a command-line tool. Here are some common usage s
    ```
 
 10. Use a different OpenAI model:
-   ```bash
-   pullcraft main --model gpt-4
-   ```
+    ```bash
+    pullcraft main --model gpt-4
+    ```
 
 11. Dump the diff to a file for review:
     ```bash
@@ -262,67 +300,6 @@ pullcraft main --placeholder-pattern "{{KEY}}" --title-template "feat({{repo}}):
 ```
 
 This will use `{{KEY}}` as the placeholder pattern instead of `__KEY__`. This flexibility allows you to customize the templates to fit your project's conventions and needs.
-
-## Examples
-
-Here are some examples of how to use PullCraft with various options and scenarios:
-
-1. Basic usage:
-   ```bash
-   pullcraft main
-   ```
-
-2. Specify both base and compare branches:
-   ```bash
-   pullcraft main feature-branch
-   ```
-
-3. Use custom file exclusions:
-   ```bash
-   pullcraft main --exclusions "*.md,package-lock.json"
-   ```
-
-4. Open the PR in the browser after creation:
-   ```bash
-   pullcraft main --open-pr
-   ```
-
-5. Use a specific GitHub strategy:
-   ```bash
-   pullcraft main --github-strategy octokit
-   ```
-
-6. Provide a hint for the AI:
-   ```bash
-   pullcraft main --hint "This PR updates the user authentication system"
-   ```
-
-7. Use custom templates:
-   ```bash
-   pullcraft main --description-template "## Changes\n\n{{description}}"
-   ```
-
-8. Set a custom diff threshold:
-   ```bash
-   pullcraft main --diff-threshold 600
-   ```
-
-9. Use a different OpenAI model:
-   ```bash
-   pullcraft main --model gpt-4
-   ```
-
-10. Dump the diff to a file for review:
-    ```bash
-    pullcraft main --dumpTo diff.txt
-    ```
-
-11. Combine multiple options:
-    ```bash
-    pullcraft main feature-branch --open-pr --exclusions "*.md" --hint "Bug fix for login system" --diff-threshold 500
-    ```
-
-These examples demonstrate various use cases and options that PullCraft supports.
 
 ## Troubleshooting
 

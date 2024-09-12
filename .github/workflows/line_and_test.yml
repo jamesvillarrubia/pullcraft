@@ -13,7 +13,10 @@ jobs:
   test: 
     name: 'Node.js v${{ matrix.node }}'
     runs-on: ubuntu-latest
-    # if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.head_ref == 'main' ||  (github.event_name == 'pull_request' && startsWith(github.head_ref,'update-dependencies-') && github.base_ref == 'main')
+    
+    # skip ci if commit message contains [skip ci] preventing version bumps from triggering a new release
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -37,9 +40,9 @@ jobs:
             ${{ runner.os }}-node-v${{ matrix.node }}-
       - name: Install dependencies
         run: npm ci
-      - name: Run linters
+      - name: Run Linters
         run: npm run lint
-      - name: Run applicationtests
+      - name: Run application tests
         run: npm run coverage
       - name: Run SEA tests
         if: matrix.node == 20
