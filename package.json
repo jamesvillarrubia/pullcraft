@@ -28,7 +28,7 @@
     "test:sea": "npm run build:sea && mocha --spec \"./build/build.test.js\" --no-config --require ts-node/register",
 
     "coverage2": "nyc npm test",
-    "release": "release-it --dry-run --ci --config .release-it.js",
+    "release": "release-it --dry-run --ci --config .release-it.cjs",
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
     "postinstall": "npx shx cp -n .githooks/* .git/hooks/",
     "package2": "nexe dist/bin/pullcraft.js --resource './dist/**/*' --build -t mac-x64-14.15.3,linux-x64-14.15.3,windows-x64-14.15.3 -o build/pullcraft",

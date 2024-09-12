@@ -39,10 +39,91 @@ PullCraft is a simple but powerful CLI tool for automating the creation and upda
 - Option to dump diffs to a file for manual review
 
 ## Prerequisites
-- Node.js v14 or higher
 - Git
 - A GitHub account
 - An OpenAI API key
+
+## Installation
+
+### Option 1: Using npm (for Node.js users)
+
+If you have Node.js installed, you can install PullCraft using npm:
+
+```bash
+npm install -g pullcraft
+```
+### Option 2: Direct download (for non-Node.js users)
+
+1. Download the PullCraft executable:
+   ```bash
+   curl -LO https://github.com/jamesvillarrubia/pullcraft/releases/download/v0.4.0/pullcraft
+   ```
+   Note: Replace `v0.4.0` with the latest version number if necessary.
+
+2. Make the downloaded file executable:
+   ```bash
+   chmod +x pullcraft
+   ```
+
+3. Move the executable to a directory in your PATH:
+   ```bash
+   sudo mv pullcraft /usr/local/bin/pullcraft
+   ```
+
+4. Verify the installation:
+   ```bash
+   pullcraft --version
+   ```
+
+For more detailed installation instructions, see our [Installation Guide](INSTALL.md).
+
+## Quick Start
+
+1. Set up your OpenAI API key:
+   - Option 1: Create a `.env` file in your project root:
+     ```bash
+     OPENAI_API_KEY=your_api_key_here
+     ```
+   - Option 2: Set it as an environment variable in your shell:
+     ```bash
+     export OPENAI_API_KEY=your_api_key_here
+     ```
+   - Option 3: Use the `--api-key` option when running PullCraft:
+     ```bash
+     plc main feature-branch --api-key your_api_key_here
+     ```
+
+2. Create a PR:
+   ```bash
+   plc main feature-branch
+   ```
+
+## Usage
+
+### CLI Examples
+
+PullCraft is primarily used as a command-line tool. Here are some common usage scenarios:
+
+1. Basic usage (create a PR from current branch to the default base branch):
+   ```bash
+   plc
+   ```
+
+2. Specify both base and compare branches:
+   ```bash
+   plc main feature-branch
+   ```
+
+// ... (keep the rest of the CLI examples) ...
+
+### Library Usage
+
+// ... (keep existing content) ...
+
+// ... (keep the rest of the sections as they are) ...
+
+
+
 
 ## Quick Start
 
