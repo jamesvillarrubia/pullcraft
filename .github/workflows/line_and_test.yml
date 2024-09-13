@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     
     # skip ci if commit message contains [skip ci] preventing version bumps from triggering a new release
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    # if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
