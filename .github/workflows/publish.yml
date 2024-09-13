@@ -34,25 +34,33 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
+
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+        
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
-          path: build
+          path: build/assets
+        
+      - run: ls -R build/assets
+
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+
       - run: npm ci
+
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/
           fail_ci_if_error: true
+      
       - run: npx release-it --ci
 
   prerelease:
@@ -79,7 +87,10 @@ jobs:
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
-          path: build
+          path: build/assets
+      
+      - run: ls -R build/assets
+
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
