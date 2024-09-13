@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import os from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,19 +21,26 @@ describe('CLI Tests', function () {
     const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8'));
     const binaryName = Object.keys(packageJson.bin)[0];
 
-    // Read the version from version.txt
-    const version = fs.readFileSync(path.join(__dirname, '../../version.txt'), 'utf8').trim();
-
-    // Determine the architecture
-    const arch = process.arch === 'x64' ? 'x64' : 'arm64';
+    // Determine the platform and architecture
+    const platform = os.platform();
+    const arch = process.arch;
 
     // Construct the expected binary name pattern
-    const binaryPattern = `${binaryName}-${version}-linux-${arch}`;
+    let binaryPattern;
+    if (platform === 'darwin') {
+      binaryPattern = `${binaryName}-.*-macos-${arch}`;
+    } else if (platform === 'linux') {
+      binaryPattern = `${binaryName}-.*-linux-${arch}`;
+    } else if (platform === 'win32') {
+      binaryPattern = `${binaryName}-.*-win-${arch}.exe`;
+    } else {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
 
     // Find the binary in the build directory
     const buildDir = path.join(__dirname, '..', 'assets');
     const files = fs.readdirSync(buildDir);
-    const binaryFile = files.find(file => file.startsWith(binaryPattern));
+    const binaryFile = files.find(file => new RegExp(binaryPattern).test(file));
 
     if (!binaryFile) {
       throw new Error(`Binary file not found matching pattern: ${binaryPattern}`);
