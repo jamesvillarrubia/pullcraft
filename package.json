@@ -29,7 +29,7 @@
     "release": "release-it --dry-run --ci --config .release-it.cjs",
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
     "postinstall": "npx shx --yes cp -n .githooks/* .git/hooks/",
-    "version": "./build/scripts/version.sh src/bin/pullcraft.ts",
+    "version": "node build/scripts/version.js src/bin/pullcraft.ts",
     "package": "npm run build:bundle && npm run build:sea"
   },
   "bin": {
