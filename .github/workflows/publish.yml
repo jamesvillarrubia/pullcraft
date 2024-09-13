@@ -8,6 +8,10 @@ on:
       - beta
       - alpha
 
+env:
+  SEA_NAME: pullcraft
+  SEA_PATH: build/assets
+
 jobs:
   lint_and_test:
     uses: ./.github/workflows/line_and_test.yml

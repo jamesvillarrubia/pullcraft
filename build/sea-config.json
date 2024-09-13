@@ -1,4 +1,4 @@
 {
   "main": "build/bundle.js",
-  "output": "build/pullcraft.blob"
+  "output": "build/prep.blob"
 }

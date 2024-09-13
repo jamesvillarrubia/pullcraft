@@ -2,17 +2,16 @@
 
 import PullCraft from '../index.js'; // Adjust the path to where your PullCraft class is located
 import dotenv from 'dotenv';
-
 import { Command } from 'commander';
 
-const VERSION_PLACEHOLDER = '__VERSION__';
+const VERSION = '__VERSION__';
 
 // Load environment variables from a .env file if it exists
 dotenv.config();
 const program = new Command();
 
 program
-  .version(VERSION_PLACEHOLDER)
+  .version(VERSION)
   .arguments('[baseBranch] [compareBranch]')
   .option('-n, --base-branch <baseBranch>', 'Base branch')
   .option('-c, --compare-branch <compareBranch>', 'Compare branch')

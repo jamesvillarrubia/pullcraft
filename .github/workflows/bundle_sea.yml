@@ -19,7 +19,6 @@ on:
         required: true
         type: string
         default: 'build/assets'
-
 jobs:
   package:
     strategy:
@@ -59,4 +58,3 @@ jobs:
 
     - name: List dist directory (for debugging)
       run: ls -R dist
-      shell: bash
