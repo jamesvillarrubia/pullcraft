@@ -1,22 +1,21 @@
 module.exports = {
   "git": {
     "requireCleanWorkingDir": false,
-    "commit": true,
-    "pushArgs": ["--follow-tags"],
-    "commitArgs": ['-a'],
-    "commitMessage": 'chore: release v${version} [skip ci]'
+    "commit": false,
+    "pushArgs": ["--tags"],
   },
   "github": {
     "release": true,
-    "assets": ["./build/pullcraft"]
+    "assets": ["./build/assets/*"]
   },
   "npm": {
     "ignoreVersion": true,
-    "publish": true
+    "publish": true,
+    "skipChecks": true
   },
   "hooks": {
-    "before:bump": "./.release-it-version.sh ${version}",
-    "after:bump": "npm run build",
+    "before:bump": "npm run version",
+    "after:bump": "npm run build && npm run package",
   },
   "plugins": {
     "@release-it/conventional-changelog": {

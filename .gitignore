@@ -3,6 +3,7 @@
 /dist
 /.nyc_output
 /coverage
-/build/pullcraft
-/build/pullcraft.blob
+/build/assets
 /build/bundle.js
+/build/prep.blob
+
