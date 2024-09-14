@@ -15,21 +15,18 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "rm -rf ./dist/cjs && tsc -p tsconfig.cjs.json && chmod +x ./dist/cjs/bin/pullcraft.js",
     "build:esm": "rm -rf ./dist/esm && tsc -p tsconfig.esm.json && chmod +x ./dist/esm/bin/pullcraft.js",
     "build:bundle": "rm -f ./build/bundle.js && node ./build/scripts/build.bundle.js --entryPoint ./dist/esm/bin/pullcraft.js",
     "build:sea": "node ./build/scripts/build.sea.js --binaryName pullcraft",
-    
     "test": "printf '\\33c\\e[3J' && npm run lint; npm run mocha;",
     "test:dev": "echo '\\033c' && npm run lint; npm run mocha:dev",
     "test:sea": "npm run build && npm run build:bundle && npm run build:sea && mocha --spec \"./build/scripts/build.test.js\" --no-config --require ts-node/register",
-
     "release": "release-it --dry-run --ci --config .release-it.cjs",
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
     "postinstall": "npx shx --yes cp -n .githooks/* .git/hooks/",
-    "version": "node build/scripts/version.js src/bin/pullcraft.ts",
+    "inject-version": "node build/scripts/version.js src/bin/pullcraft.ts",
     "package": "npm run build:bundle && npm run build:sea"
   },
   "bin": {

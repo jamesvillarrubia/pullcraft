@@ -1,10 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+import release from 'release-it';
+import opts from '../../.release-it.cjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+console.log(opts);
 async function updateVersion () {
   const filePath = process.argv[2];
 
@@ -16,15 +20,18 @@ async function updateVersion () {
   const fullPath = path.resolve(process.cwd(), filePath);
 
   try {
+    const result = await release({
+      ci: true,
+      'dry-run': true
+    });
+    const version = result.version;
+
     let content = await fs.readFile(fullPath, 'utf8');
-
-    const packageJson = JSON.parse(await fs.readFile(path.resolve(__dirname, '..', '..', 'package.json'), 'utf8'));
-    const version = packageJson.version;
-
-    content = content.replace(/const VERSION = '.*?';/, `const VERSION = '${version}';`);
+    content = content.replace(/__VERSION__/g, version);
 
     await fs.writeFile(fullPath, content);
-    console.log(`Updated version to ${version} in ${filePath}`);
+
+    console.log(`Version updated to ${version} in ${filePath}`);
   } catch (error) {
     console.error('Error updating version:', error);
     process.exit(1);

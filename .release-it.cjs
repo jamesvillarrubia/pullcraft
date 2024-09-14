@@ -13,10 +13,11 @@ module.exports = {
     "publish": true,
     "skipChecks": true
   },
-  "hooks": {
-    "before:bump": "npm run version",
-    "after:bump": "npm run build && npm run package",
-  },
+  // COMMENTED OUT BECAUSE BUNDLES NEED VERSION INJECTION FOR EACH ENVIRONMENT
+  // "hooks": {
+  //   "before:bump": "npm run inject-version",
+  //   "after:bump": "npm run build && npm run package",
+  // },
   "plugins": {
     "@release-it/conventional-changelog": {
       "whatBump": (commits,options)=>{
@@ -30,6 +31,7 @@ module.exports = {
             refactor: 'ignore',
             test: 'ignore'
           }
+ 
           let types = (options?.preset?.types || [])
           .reduce((a, v) => {
             return { ...a, [v.type]: v.release}
@@ -50,7 +52,6 @@ module.exports = {
             }
             return level
           }))
-      
           return {
             level: level,
             reason: breakings === 1
