@@ -1,16 +1,17 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
-import release from 'release-it';
-import opts from '../../.release-it.cjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log(opts);
-async function updateVersion () {
-  const filePath = process.argv[2];
+async function updateVersion (version) {
+  const filePath = process.argv[3];
+
+  if (!version) {
+    console.error('Please provide a version string as an argument.');
+    process.exit(1);
+  }
 
   if (!filePath) {
     console.error('Please provide a file path as an argument.');
@@ -20,12 +21,6 @@ async function updateVersion () {
   const fullPath = path.resolve(process.cwd(), filePath);
 
   try {
-    const result = await release({
-      ci: true,
-      'dry-run': true
-    });
-    const version = result.version;
-
     let content = await fs.readFile(fullPath, 'utf8');
     content = content.replace(/__VERSION__/g, version);
 
@@ -38,4 +33,34 @@ async function updateVersion () {
   }
 }
 
-updateVersion();
+// Parse command-line arguments
+function parseArgs () {
+  const args = process.argv.slice(2);
+  const options = {};
+
+  for (let i = 0; i < args.length; i += 2) {
+    const key = args[i].replace('--', '');
+    const value = args[i + 1];
+    options[key] = value;
+  }
+
+  return options;
+}
+
+// Validate required arguments
+function validateArgs (options) {
+  if (!options.version) {
+    console.error('Error: --version is required');
+    process.exit(1);
+  }
+
+  if (!options.filePath) {
+    console.error('Error: --filePath is required');
+    process.exit(1);
+  }
+}
+
+const options = parseArgs();
+validateArgs(options);
+
+updateVersion(options.version);

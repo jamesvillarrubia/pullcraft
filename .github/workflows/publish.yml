@@ -20,7 +20,6 @@ jobs:
       SEA_PATH: build/assets
 
   asset-checker:
-    
     needs: [lint_and_test, build_packages]
     name: Asset Checker
     runs-on: ubuntu-latest
