@@ -3,7 +3,7 @@
 /dist
 /.nyc_output
 /coverage
-# /build/assets
+/build/assets
 /build/bundle.js
 /build/prep.blob
 
