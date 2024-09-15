@@ -42,7 +42,7 @@ jobs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
         cache: 'npm'
     
     - name: Install dependencies
@@ -58,10 +58,10 @@ jobs:
     - name: Print first 20 lines of pullcraft.ts
       run: head -n 20 ./src/bin/pullcraft.ts
     
-    - name: Build Bundle
+    - name: Build Bundle with Version
       run: npm run build && npm run build:bundle
   
-    - name: Package SEA
+    - name: Package SEA with Version
       run: npm run build:sea -- --version ${{ steps.get_version.outputs.VERSION}}
 
     - name: Upload artifact
