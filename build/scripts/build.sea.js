@@ -107,4 +107,10 @@ const seaOptions = {
   version: cliOptions.version || '0.0.0'
 };
 
-createSEA(seaOptions).catch(console.error);
+console.log('Starting SEA');
+try {
+  createSEA(seaOptions);
+} catch (e) {
+  console.log('SSEA ERROR');
+  console.log(e);
+}
