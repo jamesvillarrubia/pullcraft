@@ -44,8 +44,21 @@ jobs:
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
+          name: pullcraft-macos-x64
           path: build/assets
-        
+    
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pullcraft-linux-x64
+          path: build/assets
+      
+      # - name: Download package artifacts
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: pullcraft-windows-x64
+      #     path: build/assets
+                
       - run: ls -R build/assets
 
   release:
@@ -71,6 +84,17 @@ jobs:
           name: coverage-artifacts-node-22
           path: coverage/
         
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: 
+          path: build/assets
+    
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build/assets
+      
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
@@ -114,9 +138,9 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+  
       - name: Download package artifacts
         uses: actions/download-artifact@v4
-        with:
           path: build/assets
       
       - run: ls -R build/assets
