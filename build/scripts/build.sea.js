@@ -93,6 +93,10 @@ function validateArgs (options) {
     console.error('Error: --binaryName is required');
     process.exit(1);
   }
+  if (!options.version) {
+    console.error('Error: --version is required');
+    process.exit(1);
+  }
 }
 
 // Main execution
@@ -104,7 +108,7 @@ const seaOptions = {
   blobName: cliOptions.blobName || path.join(__dirname, '..', 'prep.blob'),
   seaConfigPath: cliOptions.seaConfigPath || path.join(__dirname, '..', 'sea-config.json'),
   sentinelFuse: cliOptions.sentinelFuse || 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2',
-  version: cliOptions.version || '0.0.0'
+  version: cliOptions.version
 };
 
 createSEA(seaOptions).catch(console.error);
