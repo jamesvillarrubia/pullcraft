@@ -57,12 +57,12 @@ jobs:
 
     - name: Print first 20 lines of pullcraft.ts
       run: head -n 20 ./src/bin/pullcraft.ts
-      
+    
+    - name: Build Bundle
+      run: npm run build && npm run build:bundle
+  
     - name: Package SEA
-      run: npm run package -- --version ${{ steps.get_version.outputs.VERSION}}
-
-    - name: List artifacts
-      run: cd build/assets/; ls -la
+      run: npm run build:sea -- --version ${{ steps.get_version.outputs.VERSION}}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
