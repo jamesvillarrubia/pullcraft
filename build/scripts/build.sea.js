@@ -93,10 +93,6 @@ function validateArgs (options) {
     console.error('Error: --binaryName is required');
     process.exit(1);
   }
-  if (!options.version) {
-    console.error('Error: --version is required');
-    process.exit(1);
-  }
 }
 
 // Main execution
