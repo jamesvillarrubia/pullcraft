@@ -27,7 +27,7 @@
     "coverage": "c8 --check-coverage --lines 90 --functions 90 --branches 80 npm run test",
     "postinstall": "npx shx --yes cp -n .githooks/* .git/hooks/",
     "inject-version": "node build/scripts/version.js --filePath src/bin/pullcraft.ts",
-    "package": "npm run build && npm run build:bundle && npm run build:sea"
+    "package": "npm run build && npm run build:bundle; npm run build:sea"
   },
   "bin": {
     "pullcraft": "./dist/esm/bin/pullcraft.js"
