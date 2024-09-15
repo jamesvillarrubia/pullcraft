@@ -138,10 +138,6 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
-  
-      - name: Download package artifacts
-        uses: actions/download-artifact@v4
-          path: build/assets
       
       - run: ls -R build/assets
 
