@@ -80,6 +80,8 @@ If you encounter any issues, please check the error messages and ensure you have
 
 2. Right-click on the downloaded `install.bat` file and select "Run as administrator".
 
+   >NOTE: The windows binary currently untested and has been removed. Best option for Windows is to install with `npm -g pullcraft`
+
 This script will automatically:
 - Fetch the latest version of PullCraft
 - Download the executable
