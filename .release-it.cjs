@@ -6,17 +6,22 @@ module.exports = {
   },
   "github": {
     "release": true,
-    "assets": ["./build/assets/*"]
+    "assets": [
+      "./build/assets/pullcraft-linux-x64/pullcraft-*-linux-x64",
+      // "./build/assets/pullcraft-win-x64/pullcraft-*-win-x64",
+      "./build/assets/pullcraft-macos-x64/pullcraft-*-macos-arm64"
+    ]
   },
   "npm": {
     "ignoreVersion": true,
     "publish": true,
     "skipChecks": true
   },
-  "hooks": {
-    "before:bump": "npm run version",
-    "after:bump": "npm run build && npm run package",
-  },
+  // COMMENTED OUT BECAUSE BUNDLES NEED VERSION INJECTION FOR EACH ENVIRONMENT
+  // "hooks": {
+  //   "before:bump": "npm run inject-version",
+  //   "after:bump": "npm run build && npm run package",
+  // },
   "plugins": {
     "@release-it/conventional-changelog": {
       "whatBump": (commits,options)=>{
@@ -30,6 +35,7 @@ module.exports = {
             refactor: 'ignore',
             test: 'ignore'
           }
+ 
           let types = (options?.preset?.types || [])
           .reduce((a, v) => {
             return { ...a, [v.type]: v.release}
@@ -50,7 +56,6 @@ module.exports = {
             }
             return level
           }))
-      
           return {
             level: level,
             reason: breakings === 1

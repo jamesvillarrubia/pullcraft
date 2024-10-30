@@ -7,6 +7,7 @@ on:
       - main
       - beta
       - alpha
+      - ci/sea-assets
 
 jobs:
   lint_and_test:
@@ -18,9 +19,39 @@ jobs:
       SEA_NAME: pullcraft
       SEA_PATH: build/assets
 
+  # fetch-assets:
+  #   needs: [lint_and_test, build_packages]
+  #   name: Asset Checker
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #         registry-url: "https://registry.npmjs.org"
+
+  #     - name: Download coverage artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: coverage-artifacts-node-22
+  #         path: coverage/
+        
+  #     - name: Download package artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: build/assets
+  #         name: pullcraft-*
+                
+  #     - run: ls -R build/assets
+
   release:
     needs: [lint_and_test, build_packages]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -34,25 +65,35 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
+
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+      
+        
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
-          path: build
+          path: build/assets
+          pattern: pullcraft-*
+        
+      - run: ls -R build/assets
+
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+
       - run: npm ci
+
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/
           fail_ci_if_error: true
+      
       - run: npx release-it --ci
 
   prerelease:
@@ -71,15 +112,21 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
+      
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+        
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
-          path: build
+          path: build/assets
+          name: pullcraft-*
+        
+      - run: ls -R build/assets
+
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com

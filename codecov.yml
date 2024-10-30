@@ -1,0 +1,16 @@
+coverage:
+  status:
+    project:
+      main:
+        target: 90%  # Set the coverage threshold to 90%
+        threshold: 2%  # Allow only up to a 2% reduction in coverage
+        branches:  # Apply only to the main branch and pull requests targeting it
+          - main
+        only_pulls: false  # Run on the main branch commits and PRs to main
+    patch:
+      default:
+        target: 90%  # Ensure new code changes also meet the coverage threshold of 90%
+        threshold: 2%  # Allow only up to a 2% reduction in coverage for changes
+        branches:
+          - main
+        only_pulls: true  # Only run on pull requests to the main branch

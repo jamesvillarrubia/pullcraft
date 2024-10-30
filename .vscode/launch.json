@@ -33,6 +33,19 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Run Version Injection",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "inject-version"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Run pullcraft in test-repo",
             "runtimeExecutable": "pullcraft",
             "runtimeArgs": [
