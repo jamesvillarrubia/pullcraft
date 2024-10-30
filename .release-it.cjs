@@ -6,7 +6,11 @@ module.exports = {
   },
   "github": {
     "release": true,
-    "assets": ["./build/assets/*"]
+    "assets": [
+      "./build/assets/pullcraft-linux-x64/pullcraft-*-linux-x64",
+      // "./build/assets/pullcraft-win-x64/pullcraft-*-win-x64",
+      "./build/assets/pullcraft-macos-x64/pullcraft-*-macos-arm64"
+    ]
   },
   "npm": {
     "ignoreVersion": true,

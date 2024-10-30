@@ -1,6 +1,5 @@
-// import { describe, it, beforeEach, afterEach } from 'node:test';
+// import { describe, it, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
-import { describe, it } from 'mocha';
 import nock from 'nock'; // Change this line
 
 import * as sinon from 'sinon';
@@ -27,6 +26,7 @@ async function testErrorHandling (
   } catch (error: any) {
     expect(error.message).to.equal(expectedErrorMessage);
     expect(consoleErrorStub.calledOnce).to.equal(true);
+    expect(1).to.equal(1);
   }
 }
 

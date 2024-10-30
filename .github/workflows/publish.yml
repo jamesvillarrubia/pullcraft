@@ -19,39 +19,39 @@ jobs:
       SEA_NAME: pullcraft
       SEA_PATH: build/assets
 
-  asset-checker:
-    
-    needs: [lint_and_test, build_packages]
-    name: Asset Checker
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: "https://registry.npmjs.org"
+  # fetch-assets:
+  #   needs: [lint_and_test, build_packages]
+  #   name: Asset Checker
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #         registry-url: "https://registry.npmjs.org"
 
-      - name: Download coverage artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-artifacts-node-22
-          path: coverage/
+  #     - name: Download coverage artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: coverage-artifacts-node-22
+  #         path: coverage/
         
-      - name: Download package artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: build/assets
-        
-      - run: ls -R build/assets
+  #     - name: Download package artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: build/assets
+  #         name: pullcraft-*
+                
+  #     - run: ls -R build/assets
 
   release:
     needs: [lint_and_test, build_packages]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -71,11 +71,13 @@ jobs:
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+      
         
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
           path: build/assets
+          pattern: pullcraft-*
         
       - run: ls -R build/assets
 
@@ -110,16 +112,19 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
+      
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts-node-22
           path: coverage/
+        
       - name: Download package artifacts
         uses: actions/download-artifact@v4
         with:
           path: build/assets
-      
+          name: pullcraft-*
+        
       - run: ls -R build/assets
 
       - run: |

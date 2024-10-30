@@ -42,34 +42,30 @@ jobs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
         cache: 'npm'
     
     - name: Install dependencies
       run: npm install
 
-    - run: npx release-it --dry-run
+    - name: Get Version
+      id: get_version
+      run: echo "VERSION=$(npx release-it --ci --dry-run --release-version | tail -n 1)" >> $GITHUB_OUTPUT
 
     - name: Generate version and update source
-      run: npm run inject-version
-
-    - name: Build project
-      run: npm run build
+      run: npm run inject-version -- --version ${{ steps.get_version.outputs.VERSION}}
 
     - name: Print first 20 lines of pullcraft.ts
       run: head -n 20 ./src/bin/pullcraft.ts
-      
-    - name: Package SEA
-      run: npm run package
 
-    - name: List artifacts
-      run: cd build/assets/; ls -la
+    - name: Build Package
+      run: npm run package -- -- --version ${{ steps.get_version.outputs.VERSION}}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.asset_name }}
-        path: ${{ inputs.SEA_PATH }}/${{ matrix.asset_name }}
+        path: ${{ inputs.SEA_PATH }}
         if-no-files-found: error
 
     - name: List dist directory (for debugging)
