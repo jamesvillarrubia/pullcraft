@@ -16,7 +16,12 @@ describe('GitHubClient', () => {
 
     it('should throw "Not implemented" for listPulls', async () => {
       try {
-        await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+        await client.listPulls({
+          owner: 'test',
+          repo: 'test',
+          base: 'main',
+          head: 'feature'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
@@ -30,7 +35,13 @@ describe('GitHubClient', () => {
 
     it('should throw "Not implemented" for updatePull', async () => {
       try {
-        await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
+        await client.updatePull({
+          owner: 'test',
+          repo: 'test',
+          pullNumber: 1,
+          title: 'Test',
+          body: 'Test'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
@@ -44,7 +55,14 @@ describe('GitHubClient', () => {
 
     it('should throw "Not implemented" for createPull', async () => {
       try {
-        await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
+        await client.createPull({
+          owner: 'test',
+          repo: 'test',
+          base: 'main',
+          head: 'feature',
+          title: 'Test',
+          body: 'Test'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
@@ -60,14 +78,14 @@ describe('GitHubClient', () => {
   describe('OctokitClient', () => {
     let client: OctokitClient;
     let octokitStub: {
-    pulls: {
-      list: sinon.SinonStub;
-      update: sinon.SinonStub;
-      create: sinon.SinonStub;
+      pulls: {
+        list: sinon.SinonStub;
+        update: sinon.SinonStub;
+        create: sinon.SinonStub;
+      };
+      paginate: sinon.SinonStub;
+      request: sinon.SinonStub;
     };
-    paginate: sinon.SinonStub;
-    request: sinon.SinonStub;
-  };
 
     beforeEach(() => {
       octokitStub = {
@@ -85,19 +103,37 @@ describe('GitHubClient', () => {
     });
 
     it('should call octokit.pulls.list for listPulls', async () => {
-      const params = { owner: 'test', repo: 'test', base: 'main', head: 'feature' };
+      const params = {
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature'
+      };
       await client.listPulls(params);
       expect(octokitStub.pulls.list.calledOnceWith(params)).to.equal(true);
     });
 
     it('should call octokit.pulls.update for updatePull', async () => {
-      const params = { owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' };
+      const params = {
+        owner: 'test',
+        repo: 'test',
+        pullNumber: 1,
+        title: 'Test',
+        body: 'Test'
+      };
       await client.updatePull(params);
       expect(octokitStub.pulls.update.calledOnceWith(params)).to.equal(true);
     });
 
     it('should call octokit.pulls.create for createPull', async () => {
-      const params = { owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' };
+      const params = {
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature',
+        title: 'Test',
+        body: 'Test'
+      };
       await client.createPull(params);
       expect(octokitStub.pulls.create.calledOnceWith(params)).to.equal(true);
     });
@@ -118,7 +154,12 @@ describe('GitHubClient', () => {
 
     it('should call gh cli for listPulls', async () => {
       execSyncStub.returns(Buffer.from('[{"number": 1}]'));
-      const result = await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+      const result = await client.listPulls({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature'
+      });
       expect(execSyncStub.calledOnce).to.equal(true);
       expect(execSyncStub.firstCall.args[0]).to.include('gh pr list');
       expect(result).to.deep.equal([{ number: 1 }]);
@@ -126,22 +167,44 @@ describe('GitHubClient', () => {
 
     it('should call gh cli for updatePull', async () => {
       execSyncStub.returns(Buffer.from(''));
-      await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
+      await client.updatePull({
+        owner: 'test',
+        repo: 'test',
+        pullNumber: 1,
+        title: 'Test',
+        body: 'Test'
+      });
       expect(execSyncStub.calledOnce).to.equal(true);
       expect(execSyncStub.firstCall.args[0]).to.include('gh pr edit');
     });
 
     it('should call gh cli for createPull', async () => {
       execSyncStub.returns(Buffer.from('https://github.com/test/test/pull/1'));
-      const result = await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
+      const result = await client.createPull({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature',
+        title: 'Test',
+        body: 'Test'
+      });
       expect(execSyncStub.calledOnce).to.equal(true);
       expect(execSyncStub.firstCall.args[0]).to.include('gh pr create');
-      expect(result).to.deep.equal({ data: { html_url: 'https://github.com/test/test/pull/1' } });
+      expect(result).to.deep.equal({
+        data: { html_url: 'https://github.com/test/test/pull/1' }
+      });
     });
 
     it('should escape shell arguments', async () => {
       execSyncStub.returns(Buffer.from('https://github.com/test/test/pull/1'));
-      await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test`with`backticks', body: 'Test`body' });
+      await client.createPull({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature',
+        title: 'Test`with`backticks',
+        body: 'Test`body'
+      });
       const callArg = execSyncStub.firstCall.args[0] as string;
       expect(callArg).to.include('\'Test\\`with\\`backticks\'');
       expect(callArg).to.include('\'Test\\`body\'');
@@ -151,7 +214,12 @@ describe('GitHubClient', () => {
       execSyncStub.throws(new Error('CLI Error'));
 
       try {
-        await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+        await client.listPulls({
+          owner: 'test',
+          repo: 'test',
+          base: 'main',
+          head: 'feature'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
@@ -163,7 +231,13 @@ describe('GitHubClient', () => {
       }
 
       try {
-        await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
+        await client.updatePull({
+          owner: 'test',
+          repo: 'test',
+          pullNumber: 1,
+          title: 'Test',
+          body: 'Test'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
@@ -175,7 +249,14 @@ describe('GitHubClient', () => {
       }
 
       try {
-        await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
+        await client.createPull({
+          owner: 'test',
+          repo: 'test',
+          base: 'main',
+          head: 'feature',
+          title: 'Test',
+          body: 'Test'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
@@ -190,13 +271,31 @@ describe('GitHubClient', () => {
     it('should handle empty output from gh cli', async () => {
       execSyncStub.returns(Buffer.from(''));
 
-      const listResult = await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+      const listResult = await client.listPulls({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature'
+      });
       expect(listResult).to.deep.equal([]);
 
-      await client.updatePull({ owner: 'test', repo: 'test', pullNumber: 1, title: 'Test', body: 'Test' });
+      await client.updatePull({
+        owner: 'test',
+        repo: 'test',
+        pullNumber: 1,
+        title: 'Test',
+        body: 'Test'
+      });
       // No assertion needed for updatePull as it doesn't return anything
 
-      const createResult = await client.createPull({ owner: 'test', repo: 'test', base: 'main', head: 'feature', title: 'Test', body: 'Test' });
+      const createResult = await client.createPull({
+        owner: 'test',
+        repo: 'test',
+        base: 'main',
+        head: 'feature',
+        title: 'Test',
+        body: 'Test'
+      });
       expect(createResult).to.deep.equal({ data: { html_url: '' } });
     });
 
@@ -204,7 +303,12 @@ describe('GitHubClient', () => {
       execSyncStub.returns(Buffer.from('Invalid JSON'));
 
       try {
-        await client.listPulls({ owner: 'test', repo: 'test', base: 'main', head: 'feature' });
+        await client.listPulls({
+          owner: 'test',
+          repo: 'test',
+          base: 'main',
+          head: 'feature'
+        });
         expect.fail('Expected method to throw');
       } catch (error) {
         expect(error).to.be.an('error');
