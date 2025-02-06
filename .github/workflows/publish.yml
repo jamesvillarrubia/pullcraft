@@ -19,6 +19,7 @@ jobs:
       SEA_NAME: pullcraft
       SEA_PATH: build/assets
 
+
   # fetch-assets:
   #   needs: [lint_and_test, build_packages]
   #   name: Asset Checker
@@ -86,6 +87,8 @@ jobs:
           git config user.email github-actions@github.com
 
       - run: npm ci
+
+      - run: npm run build
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4

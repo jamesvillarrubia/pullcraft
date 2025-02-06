@@ -31,6 +31,9 @@
   "bin": {
     "pullcraft": "./dist/esm/bin/pullcraft.js"
   },
+  "files":[
+    "dist/**/*"
+  ],
   "pkg": {
     "scripts": "dist/**/*.js",
     "assets": [
