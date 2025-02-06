@@ -15,14 +15,21 @@ program
   .arguments('[baseBranch] [compareBranch]')
   .option('-n, --base-branch <baseBranch>', 'Base branch')
   .option('-c, --compare-branch <compareBranch>', 'Compare branch')
-  .option('-e, --exclusions <patterns>', 'File exclusion patterns (comma-separated)', (value) => value.split(','))
+  .option(
+    '-e, --exclusions <patterns>',
+    'File exclusion patterns (comma-separated)',
+    (value) => value.split(',')
+  )
   .option('-o, --open-pr', 'Open the PR webpage automatically')
   .option('-g, --github-strategy <strategy>', 'GitHub strategy')
   .option('-p, --placeholder-pattern <pattern>', 'Placeholder Pattern')
   .option('-s, --system-prompt <prompt>', 'System Prompt')
   .option('-t, --title-template <title>', 'Title Template')
   .option('-d, --description-template <body>', 'Description Template')
-  .option('-f, --diff-threshold <threshold>', 'Max number of changed lines in a file, defaults to 1000')
+  .option(
+    '-f, --diff-threshold <threshold>',
+    'Max number of changed lines in a file, defaults to 1000'
+  )
   .option('-h, --hint <hint>', 'Hint for the AI about the type of changes')
   .option('--api-key <key>', 'OpenAI API Key')
   .option('--url <url>', 'OpenAI URL')
