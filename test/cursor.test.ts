@@ -3,7 +3,6 @@ import { describe, it, beforeEach, afterEach } from 'mocha';
 import * as sinon from 'sinon';
 import { createCursorRule } from '../src/cursor.js';
 import fs from 'fs';
-import path from 'path';
 
 describe('Cursor Integration', () => {
   let consoleLogStub: sinon.SinonStub;
