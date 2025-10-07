@@ -2,7 +2,13 @@
  * Template for Cursor rules file to integrate PullCraft into Cursor AI workflows
  */
 
-export const cursorRuleTemplate = `# PullCraft Integration
+export const cursorRuleTemplate = `---
+description: PullCraft - AI-powered pull request generator
+globs:
+alwaysApply: true
+---
+
+# PullCraft Integration
 
 ## What is PullCraft?
 
