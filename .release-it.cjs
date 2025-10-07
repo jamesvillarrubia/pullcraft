@@ -49,7 +49,7 @@ module.exports = {
             if(commit.type === 'feat'){
               features += 1;
             }
-            console.log("level", level)
+            // console.log("level", level)
             return level
           }))
           return {
