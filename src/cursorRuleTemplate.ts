@@ -64,14 +64,6 @@ pullcraft main --open-pr false
 pullcraft main --exclusions "*.md,package-lock.json,*.svg"
 \`\`\`
 
-## Recommended Workflow
-
-1. **Complete feature work** and test changes
-2. **Commit changes**: \`git commit -m "feat: description"\`
-3. **Push branch**: \`git push -u origin feature-branch\`
-4. **Run pullcraft**: \`pullcraft main --hint "Brief description of changes"\`
-5. **Review generated PR** on GitHub and merge
-
 ## Configuration
 
 Create \`.pullcraftrc\` in project root for custom settings:
