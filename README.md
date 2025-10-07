@@ -43,6 +43,22 @@ PullCraft is a simple but powerful CLI tool for automating the creation and upda
 - A GitHub account
 - An OpenAI API key
 
+## Cursor IDE Integration
+
+PullCraft includes built-in integration with Cursor IDE. To set it up, run:
+
+```bash
+pullcraft cursor
+```
+
+This creates `.cursor/rules/pullcraft.md` which provides Cursor's AI assistant with context about how to use PullCraft. Once set up, Cursor will understand when and how to suggest using pullcraft in your workflows.
+
+To overwrite an existing file:
+
+```bash
+pullcraft cursor --force
+```
+
 ## Installation
 
 ### Option 1: Using npm (for Node.js users)
