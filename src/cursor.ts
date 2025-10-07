@@ -12,18 +12,18 @@ export interface CursorCommandOptions {
 }
 
 /**
- * Creates a Cursor rules file in .cursor/rules/pullcraft.md
+ * Creates a Cursor rules file in .cursor/rules/pullcraft.mdc
  * This integrates PullCraft into Cursor's AI assistant workflows
  */
 export function createCursorRule(options: CursorCommandOptions = {}): void {
   const cursorDir = join(process.cwd(), '.cursor');
   const rulesDir = join(cursorDir, 'rules');
-  const ruleFile = join(rulesDir, 'pullcraft.md');
+  const ruleFile = join(rulesDir, 'pullcraft.mdc');
 
   // Check if file already exists
   if (existsSync(ruleFile) && !options.force) {
     console.error(
-      'Error: .cursor/rules/pullcraft.md already exists. Use --force to overwrite.'
+      'Error: .cursor/rules/pullcraft.mdc already exists. Use --force to overwrite.'
     );
     process.exit(1);
   }
@@ -43,7 +43,7 @@ export function createCursorRule(options: CursorCommandOptions = {}): void {
 
     // Write the rule file
     writeFileSync(ruleFile, cursorRuleTemplate, 'utf8');
-    console.log('✅ Successfully created .cursor/rules/pullcraft.md');
+    console.log('✅ Successfully created .cursor/rules/pullcraft.mdc');
     console.log('');
     console.log('This file provides Cursor AI with context about how to use PullCraft.');
     console.log('The AI assistant will now understand when and how to use pullcraft commands.');

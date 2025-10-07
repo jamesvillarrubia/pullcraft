@@ -51,7 +51,7 @@ PullCraft includes built-in integration with Cursor IDE. To set it up, run:
 pullcraft cursor
 ```
 
-This creates `.cursor/rules/pullcraft.md` which provides Cursor's AI assistant with context about how to use PullCraft. Once set up, Cursor will understand when and how to suggest using pullcraft in your workflows.
+This creates `.cursor/rules/pullcraft.mdc` which provides Cursor's AI assistant with context about how to use PullCraft. Once set up, Cursor will understand when and how to suggest using pullcraft in your workflows.
 
 To overwrite an existing file:
 
