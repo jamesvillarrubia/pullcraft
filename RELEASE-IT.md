@@ -38,7 +38,7 @@ module.exports = {
   },
   "npm": {
     "ignoreVersion": true,
-    "publish": true,
+    "publish": false,
     "skipChecks": true
   },
   "plugins": {
@@ -244,12 +244,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: "https://registry.npmjs.org"
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
       - run: npm ci
-      - run: npm run build --if-present
-      - run: npx release-it --ci
+      
+      - name: Bump version and create release
+        run: npx release-it --ci
+      
+      - name: Build with updated version
+        run: npm run build
+      
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   prerelease:
     needs: test
     name: PreRelease
@@ -265,12 +275,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: "https://registry.npmjs.org"
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
       - run: npm ci
-      - run: npm run build --if-present
-      - run: npx release-it --ci --preRelease=${{github.ref_name}}
+      
+      - name: Bump version and create prerelease
+        run: npx release-it --ci --preRelease=${{github.ref_name}}
+      
+      - name: Build with updated version
+        run: npm run build
+      
+      - name: Publish to npm
+        run: npm publish --tag ${{github.ref_name}}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 
