@@ -6,7 +6,7 @@ export const cursorRuleTemplate = `# PullCraft Integration
 
 ## What is PullCraft?
 
-PullCraft is an AI-powered CLI tool that automatically generates pull request titles and descriptions by analyzing git diffs. It uses OpenAI to create meaningful, well-structured PRs following conventional commit standards.
+PullCraft is an AI-powered CLI tool that automatically generates pull request titles and descriptions by analyzing git diffs. It uses OpenAI to create meaningful, well-structured PRs. By default, it uses conventional commit format (feat:, fix:, etc.), but templates are fully customizable.
 
 ## When to Use PullCraft
 
@@ -68,7 +68,7 @@ pullcraft main --exclusions "*.md,package-lock.json,*.svg"
 
 ## Configuration
 
-Create \`.pullcraftrc\` in project root:
+Create \`.pullcraftrc\` in project root for custom settings:
 
 \`\`\`json
 {
@@ -79,17 +79,21 @@ Create \`.pullcraftrc\` in project root:
   "diffThreshold": 400,
   "openai": {
     "model": "gpt-4o",
-    "temperature": 0.2
+    "temperature": 0.2,
+    "titleTemplate": "Custom title format: <TITLE>",
+    "bodyTemplate": "Custom body format:\n\n<BODY>"
   }
 }
 \`\`\`
+
+**Note:** PullCraft uses conventional commit format by default (feat:, fix:, docs:), but you can customize templates to use any format you prefer via \`titleTemplate\` and \`bodyTemplate\` options.
 
 ## Best Practices
 
 1. **Always commit first** - PullCraft analyzes committed changes
 2. **Use \`--hint\`** - Provide context for complex PRs
 3. **Review AI output** - Always review generated title and description
-4. **Conventional commits** - Titles follow conventional commit format (feat:, fix:, docs:, etc.)
+4. **Conventional commits format** - By default, PullCraft generates titles following conventional commit format (feat:, fix:, docs:, etc.), but this is customizable via templates
 5. **Descriptive branches** - Branch names help AI understand context
 
 ## Example Workflows
@@ -147,7 +151,8 @@ export GITHUB_TOKEN=your_github_token
 - 💡 Always provide meaningful \`--hint\` to improve PR quality
 - 🔑 Default to \`gh\` strategy (requires \`gh auth login\`)
 - 🌐 PullCraft opens PR in browser by default unless \`--open-pr false\`
-- 📝 Generated PRs follow conventional commit format
+- 📝 Generated PRs use conventional commit format by default, but this is customizable
+- 🎨 Users can customize PR title and body templates via CLI options or config file
 
 ## All Available Options
 
