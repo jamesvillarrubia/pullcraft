@@ -4,5 +4,8 @@
     "module": "commonjs",
     "moduleResolution": "Node",
     "outDir": "./dist/cjs"
-  }
+  },
+  "exclude": [
+    "src/bin/**/*"
+  ]
 }

@@ -3,8 +3,19 @@
 import PullCraft from '../index.js'; // Adjust the path to where your PullCraft class is located
 import dotenv from 'dotenv';
 import { Command } from 'commander';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const VERSION = '__VERSION__';
+// Read version from package.json
+// This bin file is only used from the ESM build (see package.json "bin" field)
+// When compiled, this file is at dist/esm/bin/pullcraft.js
+// package.json is at the root, so we go up 3 levels
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJsonPath = join(__dirname, '../../../package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+const VERSION = packageJson.version;
 
 // Load environment variables from a .env file if it exists
 dotenv.config();
