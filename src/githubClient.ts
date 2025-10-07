@@ -115,6 +115,10 @@ export class OctokitClient extends GitHubClient {
 
 export class GhClient implements GitHubClient {
   private escapeShellArg (arg: string): string {
+    // Ensure arg is a string
+    if (typeof arg !== 'string') {
+      throw new Error(`escapeShellArg expects a string, received ${typeof arg}`);
+    }
     // Escape backticks first
     arg = arg.replace(/`/g, '\\`');
     // Then escape single quotes
