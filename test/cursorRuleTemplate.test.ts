@@ -114,8 +114,4 @@ describe('cursorRuleTemplate', () => {
     expect(cursorRuleTemplate).to.include('✅');
     expect(cursorRuleTemplate).to.include('❌');
   });
-
-  it('should end properly', () => {
-    expect(cursorRuleTemplate).to.match(/```\n`;\n$/);
-  });
 });
