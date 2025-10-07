@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "rm -rf ./dist/cjs && tsc -p tsconfig.cjs.json && chmod +x ./dist/cjs/bin/pullcraft.js",
+    "build:cjs": "rm -rf ./dist/cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rm -rf ./dist/esm && tsc -p tsconfig.esm.json && chmod +x ./dist/esm/bin/pullcraft.js",
     "build:bundle": "rm -f ./build/bundle.js && node ./build/scripts/build.bundle.js --entryPoint ./dist/esm/bin/pullcraft.js",
     "build:sea": "node ./build/scripts/build.sea.js --binaryName pullcraft",
