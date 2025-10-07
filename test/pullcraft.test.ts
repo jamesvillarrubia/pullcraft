@@ -841,7 +841,7 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.equal(true);
+      expect(consoleErrorStub.calledTwice).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include(
         'PR body could not be retrieved'
       );
@@ -863,9 +863,53 @@ describe('PullCraft', () => {
 
       await pullCraft.createPr('develop');
 
-      expect(consoleErrorStub.calledOnce).to.equal(true);
+      expect(consoleErrorStub.calledTwice).to.equal(true);
       expect(consoleErrorStub.firstCall.args[0]).to.include(
         'PR title could not be retrieved'
+      );
+    });
+
+    it('should handle non-string title in AI response', async () => {
+      const gitStub = sinon
+        .stub(pullCraft.git, 'revparse')
+        .resolves('feature-branch\n');
+      const getRepoInfoStub = sinon
+        .stub(pullCraft, 'getRepoInfo')
+        .resolves({ owner: 'owner', repo: 'repo' });
+      const differStub = sinon
+        .stub(pullCraft, 'differ')
+        .resolves({
+          response: JSON.stringify({ title: { text: 'PR Title' }, body: 'PR Body' }),
+          exit: false
+        });
+
+      await pullCraft.createPr('develop');
+
+      expect(consoleErrorStub.calledTwice).to.equal(true);
+      expect(consoleErrorStub.firstCall.args[0]).to.include(
+        'PR title could not be retrieved or is not a string'
+      );
+    });
+
+    it('should handle non-string body in AI response', async () => {
+      const gitStub = sinon
+        .stub(pullCraft.git, 'revparse')
+        .resolves('feature-branch\n');
+      const getRepoInfoStub = sinon
+        .stub(pullCraft, 'getRepoInfo')
+        .resolves({ owner: 'owner', repo: 'repo' });
+      const differStub = sinon
+        .stub(pullCraft, 'differ')
+        .resolves({
+          response: JSON.stringify({ title: 'PR Title', body: ['PR Body'] }),
+          exit: false
+        });
+
+      await pullCraft.createPr('develop');
+
+      expect(consoleErrorStub.calledTwice).to.equal(true);
+      expect(consoleErrorStub.firstCall.args[0]).to.include(
+        'PR body could not be retrieved or is not a string'
       );
     });
 

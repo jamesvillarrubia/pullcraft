@@ -210,6 +210,23 @@ describe('GitHubClient', () => {
       expect(callArg).to.include('\'Test\\`body\'');
     });
 
+    it('should throw error when non-string is passed to methods', async () => {
+      execSyncStub.returns(Buffer.from('https://github.com/test/test/pull/1'));
+      try {
+        await client.createPull({
+          owner: 'test',
+          repo: 'test',
+          base: 'main',
+          head: 'feature',
+          title: { text: 'Test' } as any,
+          body: 'Test body'
+        });
+        expect.fail('Should have thrown an error');
+      } catch (error: any) {
+        expect(error.message).to.include('escapeShellArg expects a string');
+      }
+    });
+
     it('should handle errors from gh cli', async () => {
       execSyncStub.throws(new Error('CLI Error'));
 

@@ -262,12 +262,14 @@ export class PullCraft {
       }
       const { title, body } = response;
 
-      if (!body) {
-        console.error('Error: PR body could not be retrieved.');
+      if (!body || typeof body !== 'string') {
+        console.error('Error: PR body could not be retrieved or is not a string.');
+        console.error('Received body:', body);
         return;
       }
-      if (!title) {
-        console.error('Error: PR title could not be retrieved.');
+      if (!title || typeof title !== 'string') {
+        console.error('Error: PR title could not be retrieved or is not a string.');
+        console.error('Received title:', title);
         return;
       }
 
@@ -304,6 +306,8 @@ export class PullCraft {
         await this.openUrl(response.data.html_url.trim().replace('\n', ''));
       }
     } catch (error: any) {
+      console.log('oops');
+      console.log(error);
       console.error(`Error creating PR: ${error.message}`);
     }
   }
