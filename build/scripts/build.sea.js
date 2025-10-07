@@ -60,7 +60,7 @@ async function createSEA (options) {
   console.log('Permissions set');
 
   // Step 3: Generate the blob
-  const generateBlobCommand = `node --experimental-sea-config ${seaConfigPath} --experimental-default-type=module`;
+  const generateBlobCommand = `node --experimental-sea-config ${seaConfigPath}`;
   console.log(`Generating blob: ${generateBlobCommand}`);
   execSync(generateBlobCommand, { stdio: 'inherit' });
 

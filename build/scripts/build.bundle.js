@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function createBundle (options) {
-  const { entryPoint, outfile } = options;
+  const { entryPoint, outfile, version } = options;
 
   console.log('Starting bundle creation process...');
 
@@ -17,9 +17,15 @@ async function createBundle (options) {
       platform: 'node',
       target: 'node18',
       outfile,
-      format: 'cjs'
+      format: 'cjs',
+      define: version ? {
+        '__VERSION_PLACEHOLDER__': `"${version}"`
+      } : {}
     });
     console.log(`Bundle created successfully at ${outfile}`);
+    if (version) {
+      console.log(`Version ${version} injected into bundle`);
+    }
   } catch (error) {
     console.error('Bundling failed:', error);
     process.exit(1);
@@ -52,9 +58,21 @@ function validateArgs (options) {
 const cliOptions = parseArgs();
 validateArgs(cliOptions);
 
+// Read version from package.json to inject into bundle
+let version;
+try {
+  const packageJsonPath = path.join(__dirname, '../..', 'package.json');
+  const { readFileSync } = await import('fs');
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  version = packageJson.version;
+} catch (error) {
+  console.warn('Could not read version from package.json:', error.message);
+}
+
 const bundleOptions = {
   entryPoint: cliOptions.entryPoint,
-  outfile: cliOptions.outfile || path.join(__dirname, '..', 'bundle.js')
+  outfile: cliOptions.outfile || path.join(__dirname, '..', 'bundle.js'),
+  version
 };
 
 createBundle(bundleOptions).catch(console.error);

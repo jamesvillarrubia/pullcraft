@@ -8,14 +8,24 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 // Read version from package.json
-// This bin file is only used from the ESM build (see package.json "bin" field)
-// When compiled, this file is at dist/esm/bin/pullcraft.js
-// package.json is at the root, so we go up 3 levels
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const packageJsonPath = join(__dirname, '../../../package.json');
-const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-const VERSION = packageJson.version;
+// For npm installs: read from package.json at runtime
+// For SEA bundles: VERSION_PLACEHOLDER is replaced at build time by esbuild
+let VERSION = '__VERSION_PLACEHOLDER__';
+
+// If running from npm install (not bundled), read version from package.json
+if (VERSION === '__VERSION_PLACEHOLDER__') {
+  try {
+    if (import.meta.url) {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      const packageJsonPath = join(__dirname, '../../../package.json');
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+      VERSION = packageJson.version;
+    }
+  } catch (error) {
+    VERSION = '0.0.0-dev';
+  }
+}
 
 // Load environment variables from a .env file if it exists
 dotenv.config();
