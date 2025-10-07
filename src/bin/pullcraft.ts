@@ -6,6 +6,7 @@ import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { createCursorRule } from '../cursor.js';
 
 // Read version from package.json
 // For npm installs: read from package.json at runtime
@@ -32,7 +33,21 @@ dotenv.config();
 const program = new Command();
 
 program
+  .name('pullcraft')
   .version(VERSION)
+  .description('AI-powered pull request generator');
+
+// Cursor integration command
+program
+  .command('cursor')
+  .description('Create a Cursor rules file for PullCraft integration')
+  .option('-f, --force', 'Overwrite existing file')
+  .action((options) => {
+    createCursorRule(options);
+  });
+
+// Main PR creation command (default)
+program
   .arguments('[baseBranch] [compareBranch]')
   .option('-n, --base-branch <baseBranch>', 'Base branch')
   .option('-c, --compare-branch <compareBranch>', 'Compare branch')
@@ -60,37 +75,40 @@ program
   .option('--stop <stop>', 'OpenAI Stop')
   .option('--temp <temperature>', 'OpenAI Temperature')
   .option('--dumpTo <filename>', 'Dump the diff to a file')
-  .parse(process.argv);
+  .action((baseBranch, compareBranch, options) => {
+    // Main PR creation logic
+    const finalBaseBranch = baseBranch || options.baseBranch;
+    const finalCompareBranch = compareBranch || options.compareBranch;
 
-const options = program.opts();
-const baseBranch = program.args[0] || options.baseBranch;
-const compareBranch = program.args[1] || options.compareBranch;
+    const nested = {
+      exclusions: options.exclusions,
+      openPr: options.openPr,
+      githubStrategy: options.githubStrategy,
+      diffThreshold: options.diffThreshold,
+      dumpTo: options.dumpTo,
+      hint: options.hint,
+      openai: {
+        apiKey: options.apiKey,
+        url: options.url,
+        model: options.model,
+        maxTokens: options.maxTokens,
+        n: options.n,
+        stop: options.stop,
+        temp: options.temp,
+        systemPrompt: options.systemPrompt,
+        placeholderPattern: options.placeholderPattern,
+        titleTemplate: options.titleTemplate,
+        bodyTemplate: options.bodyTemplate
+      }
+    };
 
-// Convert to nested option
-const nested = {
-  exclusions: options.exclusions,
-  openPr: options.openPr,
-  githubStrategy: options.githubStrategy,
-  diffThreshold: options.diffThreshold,
-  dumpTo: options.dumpTo,
-  hint: options.hint,
-  openai: {
-    apiKey: options.apiKey,
-    url: options.url,
-    model: options.model,
-    maxTokens: options.maxTokens,
-    n: options.n,
-    stop: options.stop,
-    temp: options.temp,
-    systemPrompt: options.systemPrompt,
-    placeholderPattern: options.placeholderPattern,
-    titleTemplate: options.titleTemplate,
-    bodyTemplate: options.bodyTemplate
-  }
-};
+    const pullCraft = new PullCraft(nested);
+    pullCraft.createPr(finalBaseBranch, finalCompareBranch).catch((error: any) => {
+      console.error(`Error creating PR: ${error.message}`);
+      process.exit(1);
+    });
+  });
 
-const pullCraft = new PullCraft(nested);
-pullCraft.createPr(baseBranch, compareBranch).catch((error: any) => {
-  console.error(`Error creating PR: ${error.message}`);
-  process.exit(1);
-});
+program.parse(process.argv);
+
+// Removed - logic moved into .action() handler above
