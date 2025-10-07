@@ -147,4 +147,3 @@ Options:
   -v, --version                        Display version
 \`\`\`
 `;
-

@@ -15,7 +15,7 @@ export interface CursorCommandOptions {
  * Creates a Cursor rules file in .cursor/rules/pullcraft.mdc
  * This integrates PullCraft into Cursor's AI assistant workflows
  */
-export function createCursorRule(options: CursorCommandOptions = {}): void {
+export function createCursorRule (options: CursorCommandOptions = {}): void {
   const cursorDir = join(process.cwd(), '.cursor');
   const rulesDir = join(cursorDir, 'rules');
   const ruleFile = join(rulesDir, 'pullcraft.mdc');
@@ -52,4 +52,3 @@ export function createCursorRule(options: CursorCommandOptions = {}): void {
     process.exit(1);
   }
 }
-
