@@ -116,6 +116,6 @@ describe('cursorRuleTemplate', () => {
   });
 
   it('should end properly', () => {
-    expect(cursorRuleTemplate).to.match(/```\n`;$/);
+    expect(cursorRuleTemplate).to.match(/```\n`;\n$/);
   });
 });
