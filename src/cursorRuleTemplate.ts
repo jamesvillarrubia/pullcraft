@@ -10,6 +10,10 @@ alwaysApply: true
 
 # PullCraft Integration
 
+## What is PullCraft?
+
+PullCraft is an AI-powered CLI tool that automatically generates pull request titles and descriptions by analyzing git diffs. It uses OpenAI to create meaningful, well-structured PRs. By default, it uses conventional commit format (feat:, fix:, etc.), but templates are fully customizable.
+
 ## When to Use PullCraft
 
 ✅ **Use when:** Code is committed, pushed, and ready for PR
@@ -67,6 +71,8 @@ Create \`.pullcraftrc\` in project root for custom settings:
 }
 \`\`\`
 
+**Note:** PullCraft uses conventional commit format by default (feat:, fix:, docs:), but you can customize templates to use any format you prefer via \`titleTemplate\` and \`bodyTemplate\` options.
+
 ## Best Practices
 
 1. **Commit first** - PullCraft analyzes committed changes
@@ -119,13 +125,26 @@ pullcraft main --hint "Comprehensive API endpoint documentation"
 - 🔑 Uses \`gh\` strategy by default (requires \`gh auth login\`)
 - 🌐 Opens PR in browser unless \`--open-pr false\`
 
-## Common Options
+## All Available Options
 
-| Flag | Purpose | Example |
-|------|---------|---------|
-| \`--hint\` | Add context for AI | \`--hint "Refactors auth system"\` |
-| \`--exclusions\` | Skip files in diff | \`--exclusions "*.lock,dist/"\` |
-| \`--open-pr false\` | Don't auto-open browser | |
-| \`--model\` | Change AI model | \`--model gpt-4\` |
+\`\`\`bash
+pullcraft [baseBranch] [compareBranch] [options]
+
+Options:
+  -n, --base-branch <branch>           Base branch
+  -c, --compare-branch <branch>        Compare branch
+  -e, --exclusions <patterns>          File exclusion patterns (comma-separated)
+  -o, --open-pr                        Open PR in browser automatically
+  -g, --github-strategy <strategy>     'gh' or 'octokit' (default: 'gh')
+  -h, --hint <text>                    Hint for AI about the changes
+  -t, --title-template <template>      Custom title template
+  -d, --description-template <body>    Custom description template
+  -f, --diff-threshold <number>        Max lines per file in diff (default: 400)
+  --api-key <key>                      OpenAI API Key
+  --model <model>                      OpenAI model (default: 'gpt-4o')
+  --temp <temperature>                 Temperature for AI (default: 0.2)
+  --dumpTo <filename>                  Dump diff to file instead of creating PR
+  -v, --version                        Display version
+\`\`\`
 `;
 
