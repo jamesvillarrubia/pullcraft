@@ -10,29 +10,16 @@ alwaysApply: true
 
 # PullCraft Integration
 
-## What is PullCraft?
-
-PullCraft is an AI-powered CLI tool that automatically generates pull request titles and descriptions by analyzing git diffs. It uses OpenAI to create meaningful, well-structured PRs. By default, it uses conventional commit format (feat:, fix:, etc.), but templates are fully customizable.
-
 ## When to Use PullCraft
 
-✅ **Use pullcraft when:**
-- Code changes are committed and pushed to a feature branch
-- Ready to create a pull request
-- Want AI-generated PR titles and descriptions based on code changes
-
-❌ **Do NOT use pullcraft:**
-- Before committing changes
-- On branches with no commits
-- When branch hasn't been pushed to remote yet
+✅ **Use when:** Code is committed, pushed, and ready for PR
+❌ **Don't use:** Before committing or on unpushed branches
 
 ## Prerequisites
 
-Before running pullcraft:
-1. ✓ All changes committed to current branch
-2. ✓ Branch pushed to remote repository
-3. ✓ \`OPENAI_API_KEY\` environment variable is set
-4. ✓ Authenticated with GitHub CLI (\`gh auth login\`) OR \`GITHUB_TOKEN\` set
+- [ ] Changes committed and pushed
+- [ ] \`OPENAI_API_KEY\` set
+- [ ] GitHub CLI authenticated (\`gh auth login\`)
 
 ## Basic Usage
 
@@ -49,18 +36,14 @@ pullcraft main feature-branch
 
 ## Key Options
 
-### Provide context hint for better PR descriptions
 \`\`\`bash
+# Add context for better results
 pullcraft main --hint "Refactors authentication to use JWT tokens"
-\`\`\`
 
-### Control PR opening behavior
-\`\`\`bash
+# Don't auto-open browser
 pullcraft main --open-pr false
-\`\`\`
 
-### Exclude files from diff analysis
-\`\`\`bash
+# Exclude files from analysis
 pullcraft main --exclusions "*.md,package-lock.json,*.svg"
 \`\`\`
 
@@ -84,15 +67,12 @@ Create \`.pullcraftrc\` in project root for custom settings:
 }
 \`\`\`
 
-**Note:** PullCraft uses conventional commit format by default (feat:, fix:, docs:), but you can customize templates to use any format you prefer via \`titleTemplate\` and \`bodyTemplate\` options.
-
 ## Best Practices
 
-1. **Always commit first** - PullCraft analyzes committed changes
-2. **Use \`--hint\`** - Provide context for complex PRs
-3. **Review AI output** - Always review generated title and description
-4. **Conventional commits format** - By default, PullCraft generates titles following conventional commit format (feat:, fix:, docs:, etc.), but this is customizable via templates
-5. **Descriptive branches** - Branch names help AI understand context
+1. **Commit first** - PullCraft analyzes committed changes
+2. **Use \`--hint\`** - Provide context for better results
+3. **Review output** - Always check generated title/description
+4. **Descriptive branches** - Help AI understand context
 
 ## Example Workflows
 
@@ -126,52 +106,26 @@ pullcraft main --hint "Comprehensive API endpoint documentation"
 
 ## Troubleshooting
 
-**"OPENAI_API_KEY is not set"**
-\`\`\`bash
-export OPENAI_API_KEY=your_key_here
-\`\`\`
+| Error | Solution |
+|-------|----------|
+| "OPENAI_API_KEY is not set" | \`export OPENAI_API_KEY=your_key\` |
+| "GITHUB_TOKEN is not set" | \`gh auth login\` or \`export GITHUB_TOKEN=token\` |
+| "No changes found" | Ensure different branches, changes committed |
 
-**"GITHUB_TOKEN is not set"** (octokit strategy)
-\`\`\`bash
-gh auth login
-# OR
-export GITHUB_TOKEN=your_github_token
-\`\`\`
+## AI Assistant Guidelines
 
-**"No changes found"**
-- Ensure comparing different branches
-- Verify changes are committed
-- Check you're not comparing branch to itself
+- ⚠️ Only suggest AFTER code is committed and pushed
+- 💡 Always include \`--hint\` with meaningful context
+- 🔑 Uses \`gh\` strategy by default (requires \`gh auth login\`)
+- 🌐 Opens PR in browser unless \`--open-pr false\`
 
-## Important Notes for AI Assistants
+## Common Options
 
-- ⚠️ Only suggest pullcraft AFTER code is committed and pushed
-- 💡 Always provide meaningful \`--hint\` to improve PR quality
-- 🔑 Default to \`gh\` strategy (requires \`gh auth login\`)
-- 🌐 PullCraft opens PR in browser by default unless \`--open-pr false\`
-- 📝 Generated PRs use conventional commit format by default, but this is customizable
-- 🎨 Users can customize PR title and body templates via CLI options or config file
-
-## All Available Options
-
-\`\`\`bash
-pullcraft [baseBranch] [compareBranch] [options]
-
-Options:
-  -n, --base-branch <branch>           Base branch
-  -c, --compare-branch <branch>        Compare branch
-  -e, --exclusions <patterns>          File exclusion patterns (comma-separated)
-  -o, --open-pr                        Open PR in browser automatically
-  -g, --github-strategy <strategy>     'gh' or 'octokit' (default: 'gh')
-  -h, --hint <text>                    Hint for AI about the changes
-  -t, --title-template <template>      Custom title template
-  -d, --description-template <body>    Custom description template
-  -f, --diff-threshold <number>        Max lines per file in diff (default: 400)
-  --api-key <key>                      OpenAI API Key
-  --model <model>                      OpenAI model (default: 'gpt-4o')
-  --temp <temperature>                 Temperature for AI (default: 0.2)
-  --dumpTo <filename>                  Dump diff to file instead of creating PR
-  -v, --version                        Display version
-\`\`\`
+| Flag | Purpose | Example |
+|------|---------|---------|
+| \`--hint\` | Add context for AI | \`--hint "Refactors auth system"\` |
+| \`--exclusions\` | Skip files in diff | \`--exclusions "*.lock,dist/"\` |
+| \`--open-pr false\` | Don't auto-open browser | |
+| \`--model\` | Change AI model | \`--model gpt-4\` |
 `;
 
