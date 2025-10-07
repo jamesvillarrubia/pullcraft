@@ -14,14 +14,9 @@ module.exports = {
   },
   "npm": {
     "ignoreVersion": true,
-    "publish": true,
+    "publish": false,
     "skipChecks": true
   },
-  // COMMENTED OUT BECAUSE BUNDLES NEED VERSION INJECTION FOR EACH ENVIRONMENT
-  // "hooks": {
-  //   "before:bump": "npm run inject-version",
-  //   "after:bump": "npm run build && npm run package",
-  // },
   "plugins": {
     "@release-it/conventional-changelog": {
       "whatBump": (commits,options)=>{

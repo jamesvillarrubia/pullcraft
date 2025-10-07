@@ -88,8 +88,6 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
-
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -97,7 +95,16 @@ jobs:
           directory: ./coverage/
           fail_ci_if_error: true
       
-      - run: npx release-it --ci
+      - name: Bump version and create release
+        run: npx release-it --ci
+      
+      - name: Build with updated version
+        run: npm run build
+      
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   prerelease:
     needs: [lint_and_test, build_packages]
@@ -140,4 +147,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/
           fail_ci_if_error: true
-      - run: npx release-it --ci --preRelease=${{github.ref_name}}
+      
+      - name: Bump version and create prerelease
+        run: npx release-it --ci --preRelease=${{github.ref_name}}
+      
+      - name: Build with updated version
+        run: npm run build
+      
+      - name: Publish to npm
+        run: npm publish --tag ${{github.ref_name}}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
